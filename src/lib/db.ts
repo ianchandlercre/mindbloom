@@ -31,8 +31,8 @@ export async function getDb(): Promise<SqlJsDatabase> {
     db = new SQL.Database();
   }
 
-  initializeDatabase(db);
-  return db;
+  initializeDatabase(db!);
+  return db!;
 }
 
 function saveDb() {
