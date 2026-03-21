@@ -1,160 +1,89 @@
-import initSqlJs, { Database as SqlJsDatabase } from 'sql.js';
-import fs from 'fs';
-import path from 'path';
+import { sql } from '@vercel/postgres';
 import { hashSync, compareSync } from 'bcryptjs';
 
-const DB_PATH = process.env.DATABASE_PATH || path.join(process.cwd(), 'mindbloom.db');
+let initialized = false;
 
-let db: SqlJsDatabase | null = null;
-let sqlJsReady: Promise<any> | null = null;
-
-function getSqlJs() {
-  if (!sqlJsReady) {
-    sqlJsReady = initSqlJs();
-  }
-  return sqlJsReady;
-}
-
-export async function getDb(): Promise<SqlJsDatabase> {
-  if (db) return db;
-
-  const SQL = await getSqlJs();
-
-  try {
-    if (fs.existsSync(DB_PATH)) {
-      const buffer = fs.readFileSync(DB_PATH);
-      db = new SQL.Database(buffer);
-    } else {
-      db = new SQL.Database();
-    }
-  } catch {
-    db = new SQL.Database();
-  }
-
-  initializeDatabase(db!);
-  return db!;
-}
-
-function saveDb() {
-  if (!db) return;
-  try {
-    const data = db.export();
-    const buffer = Buffer.from(data);
-    fs.writeFileSync(DB_PATH, buffer);
-  } catch (e) {
-    console.error('Failed to save database:', e);
-  }
-}
-
-function initializeDatabase(db: SqlJsDatabase) {
-  db.run(`
+async function ensureInitialized(): Promise<void> {
+  if (initialized) return;
+  await sql`
     CREATE TABLE IF NOT EXISTS users (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL,
+      id SERIAL PRIMARY KEY,
+      name TEXT NOT NULL UNIQUE,
       pin_hash TEXT NOT NULL,
-      created_at TEXT DEFAULT (datetime('now'))
+      created_at TIMESTAMPTZ DEFAULT NOW()
     )
-  `);
-  db.run(`
+  `;
+  await sql`
     CREATE TABLE IF NOT EXISTS profiles (
-      user_id INTEGER PRIMARY KEY,
+      user_id INTEGER PRIMARY KEY REFERENCES users(id),
       dimensions TEXT NOT NULL DEFAULT '{"verbal":50,"logical":50,"spatial":50,"memory":50}',
       interests TEXT NOT NULL DEFAULT '[]',
-      difficulty_level INTEGER NOT NULL DEFAULT 2,
-      FOREIGN KEY (user_id) REFERENCES users(id)
+      difficulty_level INTEGER NOT NULL DEFAULT 2
     )
-  `);
-  db.run(`
+  `;
+  await sql`
     CREATE TABLE IF NOT EXISTS game_sessions (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      user_id INTEGER NOT NULL,
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER NOT NULL REFERENCES users(id),
       game_type TEXT NOT NULL,
       score INTEGER NOT NULL DEFAULT 0,
       accuracy REAL NOT NULL DEFAULT 0,
       duration INTEGER NOT NULL DEFAULT 0,
       difficulty INTEGER NOT NULL DEFAULT 2,
       feedback TEXT,
-      created_at TEXT DEFAULT (datetime('now')),
-      FOREIGN KEY (user_id) REFERENCES users(id)
+      created_at TIMESTAMPTZ DEFAULT NOW()
     )
-  `);
-  db.run(`
+  `;
+  await sql`
     CREATE TABLE IF NOT EXISTS survey_responses (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      user_id INTEGER NOT NULL,
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER NOT NULL REFERENCES users(id),
       question_id TEXT NOT NULL,
       answer_id TEXT NOT NULL,
-      created_at TEXT DEFAULT (datetime('now')),
-      FOREIGN KEY (user_id) REFERENCES users(id)
+      created_at TIMESTAMPTZ DEFAULT NOW()
     )
-  `);
-  saveDb();
-}
-
-// ===== Helpers =====
-
-function queryOne(database: SqlJsDatabase, sql: string, params: any[] = []): any {
-  const stmt = database.prepare(sql);
-  stmt.bind(params);
-  let row = null;
-  if (stmt.step()) {
-    row = stmt.getAsObject();
-  }
-  stmt.free();
-  return row;
-}
-
-function queryAll(database: SqlJsDatabase, sql: string, params: any[] = []): any[] {
-  const stmt = database.prepare(sql);
-  stmt.bind(params);
-  const rows: any[] = [];
-  while (stmt.step()) {
-    rows.push(stmt.getAsObject());
-  }
-  stmt.free();
-  return rows;
-}
-
-function runSql(database: SqlJsDatabase, sql: string, params: any[] = []) {
-  database.run(sql, params);
-  saveDb();
-}
-
-function getLastInsertId(database: SqlJsDatabase): number {
-  const row = queryOne(database, 'SELECT last_insert_rowid() as id');
-  return row?.id || 0;
+  `;
+  initialized = true;
 }
 
 // ===== User Operations =====
 
 export async function createUser(name: string, pin: string): Promise<{ id: number; name: string }> {
-  const database = await getDb();
+  await ensureInitialized();
   const pinHash = hashSync(pin, 10);
-  runSql(database, 'INSERT INTO users (name, pin_hash) VALUES (?, ?)', [name, pinHash]);
-  const userId = getLastInsertId(database);
-  runSql(database, 'INSERT INTO profiles (user_id) VALUES (?)', [userId]);
-  return { id: userId, name };
+  const { rows } = await sql`
+    INSERT INTO users (name, pin_hash) VALUES (${name}, ${pinHash})
+    RETURNING id, name
+  `;
+  const user = rows[0];
+  await sql`INSERT INTO profiles (user_id) VALUES (${user.id})`;
+  return { id: user.id, name: user.name };
 }
 
 export async function authenticateUser(name: string, pin: string): Promise<{ id: number; name: string } | null> {
-  const database = await getDb();
-  const user = queryOne(database, 'SELECT id, name, pin_hash FROM users WHERE LOWER(name) = LOWER(?)', [name]);
-  if (!user) return null;
+  await ensureInitialized();
+  const { rows } = await sql`
+    SELECT id, name, pin_hash FROM users WHERE LOWER(name) = LOWER(${name})
+  `;
+  if (rows.length === 0) return null;
+  const user = rows[0];
   if (!compareSync(pin, user.pin_hash)) return null;
   return { id: user.id, name: user.name };
 }
 
 export async function getUser(userId: number): Promise<{ id: number; name: string; created_at: string } | null> {
-  const database = await getDb();
-  return queryOne(database, 'SELECT id, name, created_at FROM users WHERE id = ?', [userId]);
+  await ensureInitialized();
+  const { rows } = await sql`SELECT id, name, created_at FROM users WHERE id = ${userId}`;
+  return (rows[0] as any) || null;
 }
 
 // ===== Profile Operations =====
 
 export async function getProfile(userId: number) {
-  const database = await getDb();
-  const row = queryOne(database, 'SELECT * FROM profiles WHERE user_id = ?', [userId]);
-  if (!row) return null;
+  await ensureInitialized();
+  const { rows } = await sql`SELECT * FROM profiles WHERE user_id = ${userId}`;
+  if (rows.length === 0) return null;
+  const row = rows[0];
   return {
     userId: row.user_id,
     dimensions: JSON.parse(row.dimensions),
@@ -164,19 +93,23 @@ export async function getProfile(userId: number) {
 }
 
 export async function updateProfile(userId: number, dimensions: any, interests: string[], difficultyLevel?: number) {
-  const database = await getDb();
+  await ensureInitialized();
   if (difficultyLevel !== undefined) {
-    runSql(database, 'UPDATE profiles SET dimensions = ?, interests = ?, difficulty_level = ? WHERE user_id = ?',
-      [JSON.stringify(dimensions), JSON.stringify(interests), difficultyLevel, userId]);
+    await sql`
+      UPDATE profiles SET dimensions = ${JSON.stringify(dimensions)}, interests = ${JSON.stringify(interests)}, difficulty_level = ${difficultyLevel}
+      WHERE user_id = ${userId}
+    `;
   } else {
-    runSql(database, 'UPDATE profiles SET dimensions = ?, interests = ? WHERE user_id = ?',
-      [JSON.stringify(dimensions), JSON.stringify(interests), userId]);
+    await sql`
+      UPDATE profiles SET dimensions = ${JSON.stringify(dimensions)}, interests = ${JSON.stringify(interests)}
+      WHERE user_id = ${userId}
+    `;
   }
 }
 
 export async function updateDifficulty(userId: number, difficulty: number) {
-  const database = await getDb();
-  runSql(database, 'UPDATE profiles SET difficulty_level = ? WHERE user_id = ?', [difficulty, userId]);
+  await ensureInitialized();
+  await sql`UPDATE profiles SET difficulty_level = ${difficulty} WHERE user_id = ${userId}`;
 }
 
 // ===== Game Session Operations =====
@@ -190,57 +123,59 @@ export async function saveGameSession(session: {
   difficulty: number;
   feedback?: any;
 }) {
-  const database = await getDb();
-  runSql(database,
-    `INSERT INTO game_sessions (user_id, game_type, score, accuracy, duration, difficulty, feedback)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`,
-    [session.userId, session.gameType, session.score, session.accuracy, session.duration, session.difficulty,
-     session.feedback ? JSON.stringify(session.feedback) : null]);
-  return getLastInsertId(database);
+  await ensureInitialized();
+  const feedbackJson = session.feedback ? JSON.stringify(session.feedback) : null;
+  const { rows } = await sql`
+    INSERT INTO game_sessions (user_id, game_type, score, accuracy, duration, difficulty, feedback)
+    VALUES (${session.userId}, ${session.gameType}, ${session.score}, ${session.accuracy}, ${session.duration}, ${session.difficulty}, ${feedbackJson})
+    RETURNING id
+  `;
+  return rows[0].id;
 }
 
-export async function getGameSessions(userId: number, limit = 50) {
-  const database = await getDb();
-  const rows = queryAll(database,
-    'SELECT * FROM game_sessions WHERE user_id = ? ORDER BY created_at DESC LIMIT ?',
-    [userId, limit]);
+export async function getGameSessions(userId: number, limit = 50): Promise<any[]> {
+  await ensureInitialized();
+  const { rows } = await sql`
+    SELECT * FROM game_sessions WHERE user_id = ${userId} ORDER BY created_at DESC LIMIT ${limit}
+  `;
   return rows.map(r => ({ ...r, feedback: r.feedback ? JSON.parse(r.feedback) : null }));
 }
 
-export async function getGameSessionsByType(userId: number, gameType: string, limit = 10) {
-  const database = await getDb();
-  const rows = queryAll(database,
-    'SELECT * FROM game_sessions WHERE user_id = ? AND game_type = ? ORDER BY created_at DESC LIMIT ?',
-    [userId, gameType, limit]);
+export async function getGameSessionsByType(userId: number, gameType: string, limit = 10): Promise<any[]> {
+  await ensureInitialized();
+  const { rows } = await sql`
+    SELECT * FROM game_sessions WHERE user_id = ${userId} AND game_type = ${gameType} ORDER BY created_at DESC LIMIT ${limit}
+  `;
   return rows.map(r => ({ ...r, feedback: r.feedback ? JSON.parse(r.feedback) : null }));
 }
 
 export async function getSessionStats(userId: number) {
-  const database = await getDb();
-  const total = queryOne(database, 'SELECT COUNT(*) as count FROM game_sessions WHERE user_id = ?', [userId]);
-  const avgAccuracy = queryOne(database, 'SELECT AVG(accuracy) as avg FROM game_sessions WHERE user_id = ?', [userId]);
-  const totalScore = queryOne(database, 'SELECT SUM(score) as total FROM game_sessions WHERE user_id = ?', [userId]);
-  const favoriteGame = queryOne(database,
-    `SELECT game_type, COUNT(*) as count FROM game_sessions WHERE user_id = ?
-     GROUP BY game_type ORDER BY count DESC LIMIT 1`, [userId]);
-
-  const recentDays = queryAll(database,
-    `SELECT DISTINCT date(created_at) as day FROM game_sessions WHERE user_id = ?
-     ORDER BY day DESC LIMIT 30`, [userId]);
+  await ensureInitialized();
+  const { rows: totalRows } = await sql`SELECT COUNT(*) as count FROM game_sessions WHERE user_id = ${userId}`;
+  const { rows: avgRows } = await sql`SELECT AVG(accuracy) as avg FROM game_sessions WHERE user_id = ${userId}`;
+  const { rows: scoreRows } = await sql`SELECT SUM(score) as total FROM game_sessions WHERE user_id = ${userId}`;
+  const { rows: gameRows } = await sql`
+    SELECT game_type, COUNT(*) as count FROM game_sessions WHERE user_id = ${userId}
+    GROUP BY game_type ORDER BY count DESC LIMIT 1
+  `;
+  const { rows: dayRows } = await sql`
+    SELECT DISTINCT TO_CHAR(DATE(created_at), 'YYYY-MM-DD') as day FROM game_sessions WHERE user_id = ${userId}
+    ORDER BY day DESC LIMIT 30
+  `;
 
   let streak = 0;
-  for (let i = 0; i < recentDays.length; i++) {
+  for (let i = 0; i < dayRows.length; i++) {
     const expectedDate = new Date();
     expectedDate.setDate(expectedDate.getDate() - i);
     const expected = expectedDate.toISOString().split('T')[0];
-    if (recentDays[i]?.day === expected) { streak++; } else { break; }
+    if (dayRows[i]?.day === expected) { streak++; } else { break; }
   }
 
   return {
-    totalSessions: total?.count || 0,
-    averageAccuracy: Math.round((avgAccuracy?.avg || 0) * 100) / 100,
-    totalScore: totalScore?.total || 0,
-    favoriteGame: favoriteGame?.game_type || null,
+    totalSessions: parseInt(totalRows[0]?.count || '0'),
+    averageAccuracy: Math.round((parseFloat(avgRows[0]?.avg || '0')) * 100) / 100,
+    totalScore: parseInt(scoreRows[0]?.total || '0'),
+    favoriteGame: gameRows[0]?.game_type || null,
     streak,
   };
 }
@@ -248,21 +183,21 @@ export async function getSessionStats(userId: number) {
 // ===== Survey Operations =====
 
 export async function saveSurveyResponses(userId: number, responses: { questionId: string; answerId: string }[]) {
-  const database = await getDb();
-  runSql(database, 'DELETE FROM survey_responses WHERE user_id = ?', [userId]);
+  await ensureInitialized();
+  await sql`DELETE FROM survey_responses WHERE user_id = ${userId}`;
   for (const item of responses) {
-    runSql(database, 'INSERT INTO survey_responses (user_id, question_id, answer_id) VALUES (?, ?, ?)',
-      [userId, item.questionId, item.answerId]);
+    await sql`INSERT INTO survey_responses (user_id, question_id, answer_id) VALUES (${userId}, ${item.questionId}, ${item.answerId})`;
   }
 }
 
 export async function getSurveyResponses(userId: number) {
-  const database = await getDb();
-  return queryAll(database, 'SELECT question_id, answer_id FROM survey_responses WHERE user_id = ? ORDER BY id', [userId]);
+  await ensureInitialized();
+  const { rows } = await sql`SELECT question_id, answer_id FROM survey_responses WHERE user_id = ${userId} ORDER BY id`;
+  return rows;
 }
 
 export async function hasSurveyCompleted(userId: number): Promise<boolean> {
-  const database = await getDb();
-  const result = queryOne(database, 'SELECT COUNT(*) as count FROM survey_responses WHERE user_id = ?', [userId]);
-  return (result?.count || 0) >= 10;
+  await ensureInitialized();
+  const { rows } = await sql`SELECT COUNT(*) as count FROM survey_responses WHERE user_id = ${userId}`;
+  return parseInt(rows[0]?.count || '0') >= 10;
 }

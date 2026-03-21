@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getDb } from '@/lib/db';
+import { sql } from '@vercel/postgres';
 
 export async function POST(request: NextRequest) {
   try {
@@ -9,9 +9,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'sessionId and feedback required' }, { status: 400 });
     }
 
-    const db = await getDb();
-    db.run('UPDATE game_sessions SET feedback = ? WHERE id = ?',
-      [JSON.stringify(feedback), sessionId]);
+    await sql`UPDATE game_sessions SET feedback = ${JSON.stringify(feedback)} WHERE id = ${sessionId}`;
 
     return NextResponse.json({ success: true });
   } catch (e) {
