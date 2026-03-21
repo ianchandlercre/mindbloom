@@ -90,6 +90,12 @@ export default function GamePage() {
     if (user?.id && config) fetchAIContent();
   }, [user?.id, config, fetchAIContent]);
 
+  useEffect(() => {
+    if (started && gameState.isComplete) {
+      completeGame();
+    }
+  }, [gameState.isComplete, started, completeGame]);
+
   if (loading || !user || !config) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-cream">
@@ -105,10 +111,10 @@ export default function GamePage() {
   const preferredEra = (profile as any)?.preferredEra;
   const theme = GAME_THEMES[gameId] || GAME_THEMES['knowledge-quiz'];
 
-  // Memory Journey: totalRounds = number of pairs (4/6/8 by difficulty) so isComplete fires after last pair
-  const defaultRounds = gameId === 'memory-journey'
-    ? (difficulty <= 2 ? 4 : difficulty <= 4 ? 6 : 8)
-    : 8;
+  // Memory Journey uses pair-matching, not round-based progression.
+  // Set totalRounds high so recordAnswer never prematurely ends the game.
+  // MemoryJourney calls onComplete directly when all pairs are matched.
+  const defaultRounds = gameId === 'memory-journey' ? 999 : 8;
 
   const handleStart = () => {
     startGame(defaultRounds);
