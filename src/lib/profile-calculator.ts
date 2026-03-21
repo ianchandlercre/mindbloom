@@ -5,6 +5,7 @@ import { CognitiveProfile, InterestArea, SurveyAnswer, SurveyQuestion, SurveyRes
 export const SURVEY_QUESTIONS: SurveyQuestion[] = [
   {
     id: 'q1',
+    type: 'ranking',
     text: 'When you have a free afternoon, what sounds most appealing?',
     subtitle: 'Pick the activity that draws you in the most',
     answers: [
@@ -16,6 +17,7 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
   },
   {
     id: 'q2',
+    type: 'ranking',
     text: 'Which subject did you enjoy most in school?',
     subtitle: 'Think back to your favorite classes',
     answers: [
@@ -27,6 +29,7 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
   },
   {
     id: 'q3',
+    type: 'ranking',
     text: 'How do you usually give directions to someone?',
     subtitle: 'This tells us about how you think!',
     answers: [
@@ -38,6 +41,7 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
   },
   {
     id: 'q4',
+    type: 'ranking',
     text: 'What kind of TV shows or movies do you enjoy most?',
     answers: [
       { id: 'q4a', text: 'Documentaries and educational shows', emoji: '📺', dimensionWeights: { logical: 15, memory: 10 }, interestTags: ['science', 'history'] },
@@ -48,6 +52,7 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
   },
   {
     id: 'q5',
+    type: 'ranking',
     text: 'When you need to remember something important, what do you do?',
     subtitle: 'Everyone has their own memory tricks',
     answers: [
@@ -59,6 +64,7 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
   },
   {
     id: 'q6',
+    type: 'ranking',
     text: 'Which of these would you enjoy at a party?',
     answers: [
       { id: 'q6a', text: 'Having a great conversation', emoji: '💬', dimensionWeights: { verbal: 25 }, interestTags: ['current_events'] },
@@ -69,6 +75,7 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
   },
   {
     id: 'q7',
+    type: 'ranking',
     text: 'If you could travel anywhere, where would you go?',
     answers: [
       { id: 'q7a', text: 'A historic city like Rome or Athens', emoji: '🏛️', dimensionWeights: { verbal: 10, memory: 15 }, interestTags: ['history', 'travel'] },
@@ -79,6 +86,7 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
   },
   {
     id: 'q8',
+    type: 'ranking',
     text: 'How comfortable are you with numbers and math?',
     subtitle: 'Be honest — there are no wrong answers!',
     answers: [
@@ -90,6 +98,7 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
   },
   {
     id: 'q9',
+    type: 'ranking',
     text: 'When solving a problem, how do you usually approach it?',
     answers: [
       { id: 'q9a', text: 'Break it into logical steps', emoji: '📊', dimensionWeights: { logical: 25 }, interestTags: [] },
@@ -100,6 +109,7 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
   },
   {
     id: 'q10',
+    type: 'ranking',
     text: 'What do you most enjoy reading about?',
     answers: [
       { id: 'q10a', text: 'Current events and news', emoji: '📰', dimensionWeights: { verbal: 15, memory: 10 }, interestTags: ['current_events'] },
@@ -110,6 +120,7 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
   },
   {
     id: 'q11',
+    type: 'ranking',
     text: 'Which of these games sounds most fun to you?',
     subtitle: 'This helps us recommend the best brain games',
     answers: [
@@ -121,6 +132,7 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
   },
   {
     id: 'q12',
+    type: 'ranking',
     text: "How would you describe your energy for learning new things?",
     subtitle: "Last question — you're almost done!",
     answers: [
