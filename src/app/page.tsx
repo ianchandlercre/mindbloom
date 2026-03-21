@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@/hooks/useUser';
+import { Brain } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -12,7 +13,6 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  // Redirect if already logged in
   if (user && !loading) {
     router.push('/dashboard');
     return null;
@@ -48,7 +48,7 @@ export default function LoginPage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-cream">
         <div className="text-center">
-          <div className="text-6xl mb-4 animate-pulse-gentle">🌱</div>
+          <div className="w-10 h-10 border-2 border-soft-blue border-t-transparent rounded-full animate-spin mx-auto mb-4" />
           <p className="text-body-lg text-warm-gray-light">Loading...</p>
         </div>
       </div>
@@ -60,10 +60,12 @@ export default function LoginPage() {
       <div className="w-full max-w-md animate-slide-up">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="text-7xl mb-3">🌱</div>
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-soft-blue rounded-full mb-4 shadow-warm-md">
+            <Brain className="w-10 h-10 text-white" />
+          </div>
           <h1 className="text-heading-lg font-bold text-warm-gray">MindBloom</h1>
           <p className="text-body-lg text-warm-gray-light mt-2">
-            Keep your mind sharp with personalized brain training
+            Personalized brain training, designed for you
           </p>
         </div>
 
@@ -133,8 +135,8 @@ export default function LoginPage() {
               />
               <p className="text-sm text-warm-gray-light mt-2">
                 {mode === 'register'
-                  ? 'Choose a simple 4-digit PIN you\'ll remember'
-                  : 'Enter the PIN you created when signing up'}
+                  ? 'Choose a simple 4-digit PIN you will remember'
+                  : 'Enter the PIN you chose when signing up'}
               </p>
             </div>
 
@@ -156,9 +158,8 @@ export default function LoginPage() {
           </form>
         </div>
 
-        {/* Footer */}
         <p className="text-center text-sm text-warm-gray-light mt-6">
-          A gentle brain training experience designed for you
+          A gentle brain training experience, crafted for you
         </p>
       </div>
     </div>

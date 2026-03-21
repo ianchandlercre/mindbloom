@@ -2,7 +2,9 @@ import {
   CognitiveProfile, GameConfig, GameType, InterestArea,
   RecommendedGame, DifficultyAdjustment, GameFeedback, GameSession
 } from '@/types';
-import { GAME_CONFIGS } from './game-data';
+import { GAME_CONFIGS, ACTIVE_GAME_IDS } from './game-data';
+
+const ACTIVE_GAME_CONFIGS = GAME_CONFIGS.filter(g => ACTIVE_GAME_IDS.includes(g.id as GameType));
 
 // ===== Game Recommendation Engine =====
 
@@ -14,7 +16,7 @@ export function getRecommendedGames(
 ): RecommendedGame[] {
   const recommendations: RecommendedGame[] = [];
 
-  for (const config of GAME_CONFIGS) {
+  for (const config of ACTIVE_GAME_CONFIGS) {
     let matchScore = 0;
 
     // 1. Dimension match (40% weight)
@@ -174,10 +176,10 @@ export function updateDimensionScores(
 export function getEncouragementMessage(accuracy: number, gameType: GameType): string {
   if (accuracy >= 90) {
     const messages = [
-      'Outstanding! You\'re really shining today! ⭐',
-      'Wonderful work! Your mind is sharp as ever!',
-      'Brilliant! That was truly impressive!',
-      'Fantastic score! You should be very proud!',
+      "Outstanding — your mind is truly sharp today.",
+      "Wonderful work! That was a brilliant performance.",
+      "Exceptional! You should feel very proud of that score.",
+      "Superb effort — you made that look easy.",
     ];
     return messages[Math.floor(Math.random() * messages.length)];
   }

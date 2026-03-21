@@ -2,6 +2,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { Brain, Flame, Gamepad2 } from 'lucide-react';
 import { useUser } from '@/hooks/useUser';
 import { useAdaptive } from '@/hooks/useAdaptive';
 import { getGameConfig, GAME_CONFIGS } from '@/lib/game-data';
@@ -22,7 +23,7 @@ export default function ProfilePage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-cream">
         <div className="text-center">
-          <div className="text-6xl mb-4 animate-pulse-gentle">🌱</div>
+          <div className="w-10 h-10 border-2 border-soft-blue border-t-transparent rounded-full animate-spin mx-auto mb-4" />
           <p className="text-body-lg text-warm-gray-light">Loading profile...</p>
         </div>
       </div>
@@ -61,7 +62,9 @@ export default function ProfilePage() {
             ← Back to Games
           </Link>
           <div className="flex items-center gap-2">
-            <span className="text-2xl">🌱</span>
+            <div className="w-7 h-7 bg-soft-blue rounded-warm flex items-center justify-center">
+              <Brain className="w-4 h-4 text-white" />
+            </div>
             <span className="text-body font-bold text-warm-gray">MindBloom</span>
           </div>
         </div>
@@ -100,15 +103,20 @@ export default function ProfilePage() {
                 </div>
                 <div className="flex justify-between items-center py-3 border-b border-cream-dark">
                   <span className="text-body text-warm-gray-light">Current Streak</span>
-                  <span className="text-body-lg font-bold text-warm-gray">
-                    {stats.streak > 0 ? `🔥 ${stats.streak} days` : 'Start today!'}
+                  <span className="text-body-lg font-bold text-warm-gray flex items-center gap-1">
+                    {stats.streak > 0 ? (
+                      <>
+                        <Flame className="w-5 h-5 text-amber" />
+                        {stats.streak} days
+                      </>
+                    ) : 'Start today!'}
                   </span>
                 </div>
                 {stats.favoriteGame && (
                   <div className="flex justify-between items-center py-3">
                     <span className="text-body text-warm-gray-light">Favorite Game</span>
                     <span className="text-body-lg font-bold text-warm-gray">
-                      {getGameConfig(stats.favoriteGame)?.emoji} {getGameConfig(stats.favoriteGame)?.name}
+                      {getGameConfig(stats.favoriteGame)?.name}
                     </span>
                   </div>
                 )}
@@ -150,7 +158,7 @@ export default function ProfilePage() {
                   return (
                     <div key={gc.id} className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <span className="text-xl">{gc.emoji}</span>
+                        <Gamepad2 className="w-5 h-5 text-warm-gray-light" />
                         <span className="text-body text-warm-gray">{gc.name}</span>
                       </div>
                       <span className="text-body font-semibold text-warm-gray-light">{count}x</span>
@@ -174,7 +182,7 @@ export default function ProfilePage() {
                 return (
                   <div key={i} className="flex items-center justify-between py-2 border-b border-cream-dark last:border-0">
                     <div className="flex items-center gap-3">
-                      <span className="text-xl">{gc?.emoji || '🎮'}</span>
+                      <Gamepad2 className="w-5 h-5 text-warm-gray-light" />
                       <div>
                         <p className="text-body text-warm-gray">{gc?.name || s.game_type}</p>
                         <p className="text-sm text-warm-gray-light">

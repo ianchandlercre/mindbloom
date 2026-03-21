@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import { Star, ThumbsUp, ThumbsDown, HelpCircle, CheckCircle2, Minus, Plus } from 'lucide-react';
 import { GameFeedback } from '@/types';
 
 interface Props {
@@ -47,11 +48,11 @@ export default function PostGameSurvey({ onSubmit, onSkip }: Props) {
               <button
                 key={star}
                 onClick={() => setEnjoyment(star)}
-                className={`text-5xl transition-transform hover:scale-110 ${
-                  star <= enjoyment ? 'opacity-100' : 'opacity-30'
+                className={`transition-transform hover:scale-110 ${
+                  star <= enjoyment ? 'text-amber' : 'text-warm-gray-light/30'
                 }`}
               >
-                ⭐
+                <Star className="w-10 h-10" fill={star <= enjoyment ? 'currentColor' : 'none'} />
               </button>
             ))}
           </div>
@@ -71,9 +72,9 @@ export default function PostGameSurvey({ onSubmit, onSkip }: Props) {
           <p className="text-body-lg text-warm-gray mb-4">How was the difficulty level?</p>
           <div className="grid grid-cols-1 gap-3">
             {[
-              { value: 'too_easy' as const, label: 'Too Easy', emoji: '😊', desc: 'I need more challenge' },
-              { value: 'just_right' as const, label: 'Just Right', emoji: '👌', desc: 'Perfect for me' },
-              { value: 'too_hard' as const, label: 'Too Hard', emoji: '😅', desc: 'A bit much for me' },
+              { value: 'too_easy' as const, label: 'Too Easy', Icon: Minus, desc: 'I need more challenge' },
+              { value: 'just_right' as const, label: 'Just Right', Icon: CheckCircle2, desc: 'Perfect for me' },
+              { value: 'too_hard' as const, label: 'Too Hard', Icon: Plus, desc: 'A bit much for me' },
             ].map(opt => (
               <button
                 key={opt.value}
@@ -84,7 +85,7 @@ export default function PostGameSurvey({ onSubmit, onSkip }: Props) {
                     : 'bg-cream border-2 border-cream-dark hover:border-soft-blue-light'
                 }`}
               >
-                <span className="text-3xl">{opt.emoji}</span>
+                <opt.Icon className={`w-7 h-7 ${difficulty === opt.value ? 'text-soft-blue' : 'text-warm-gray-light'}`} />
                 <div>
                   <p className="text-body font-medium text-warm-gray">{opt.label}</p>
                   <p className="text-sm text-warm-gray-light">{opt.desc}</p>
@@ -101,9 +102,9 @@ export default function PostGameSurvey({ onSubmit, onSkip }: Props) {
           <p className="text-body-lg text-warm-gray mb-4">Would you play this game again?</p>
           <div className="grid grid-cols-3 gap-3">
             {[
-              { value: 'yes' as const, label: 'Yes!', emoji: '👍' },
-              { value: 'maybe' as const, label: 'Maybe', emoji: '🤔' },
-              { value: 'no' as const, label: 'Not really', emoji: '👎' },
+              { value: 'yes' as const, label: 'Yes!', Icon: ThumbsUp },
+              { value: 'maybe' as const, label: 'Maybe', Icon: HelpCircle },
+              { value: 'no' as const, label: 'Not really', Icon: ThumbsDown },
             ].map(opt => (
               <button
                 key={opt.value}
@@ -114,7 +115,7 @@ export default function PostGameSurvey({ onSubmit, onSkip }: Props) {
                     : 'bg-cream border-2 border-cream-dark hover:border-soft-blue-light'
                 }`}
               >
-                <span className="text-3xl">{opt.emoji}</span>
+                <opt.Icon className={`w-7 h-7 ${playAgain === opt.value ? 'text-soft-blue' : 'text-warm-gray-light'}`} />
                 <p className="text-body font-medium text-warm-gray">{opt.label}</p>
               </button>
             ))}
@@ -135,7 +136,7 @@ export default function PostGameSurvey({ onSubmit, onSkip }: Props) {
           disabled={!canContinue()}
           className="py-3 px-8 bg-soft-blue text-white rounded-warm text-body font-medium hover:bg-soft-blue-dark transition-colors disabled:opacity-50"
         >
-          {step === 2 ? 'Done! ✓' : 'Next'}
+          {step === 2 ? 'Done' : 'Next'}
         </button>
       </div>
     </div>

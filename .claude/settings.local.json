@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find /c/Users/ichan/Documents/mindbloom/.claude/worktrees/exciting-sanderson -type f -name *.json -o -name *.js -o -name *.ts -o -name *.tsx -o -name *.sql -o -name *.env* -o -name *.config.*)",
+      "Bash(npm install:*)",
+      "Bash(npm run:*)"
+    ]
+  }
+}
