@@ -97,7 +97,10 @@ export default function GamePage() {
   const interests: InterestArea[] = profile?.interests || [];
   const preferredEra = (profile as any)?.preferredEra;
 
-  const defaultRounds = gameId === 'memory-journey' ? 1 : 8;
+  // Memory Journey uses pair-matching, not round-based progression.
+  // Set totalRounds high so recordAnswer never prematurely ends the game.
+  // MemoryJourney calls onComplete directly when all pairs are matched.
+  const defaultRounds = gameId === 'memory-journey' ? 999 : 8;
 
   const handleStart = () => {
     startGame(defaultRounds);

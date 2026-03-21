@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { WordConnectionRound, InterestArea } from '@/types';
 import { getWordConnectionRounds } from '@/lib/game-data';
 import { getEncouragementMessage } from '@/lib/adaptive-engine';
+import { Star } from 'lucide-react';
 
 interface Props {
   difficulty: number;
@@ -34,8 +35,8 @@ export default function WordConnection({ difficulty, interests, onAnswer, onComp
     if (feedback || !round) return;
     const isCorrect = index === round.correctIndex;
     const message = isCorrect
-      ? '✅ That\'s right!'
-      : `❌ The answer was: ${round.options[round.correctIndex]}`;
+      ? 'Correct!'
+      : `The answer was: ${round.options[round.correctIndex]}`;
 
     setFeedback({ correct: isCorrect, selectedIndex: index, message });
     onAnswer(isCorrect);
@@ -54,7 +55,7 @@ export default function WordConnection({ difficulty, interests, onAnswer, onComp
     const accuracy = totalRounds > 0 ? Math.round((score / (totalRounds * 10)) * 100) : 0;
     return (
       <div className="text-center py-8 animate-fade-in">
-        <div className="text-6xl mb-4">🎉</div>
+        <div className="w-16 h-16 bg-sage/20 rounded-full flex items-center justify-center mx-auto mb-4"><Star className="w-8 h-8 text-sage-dark" /></div>
         <h2 className="text-heading font-bold text-warm-gray mb-3">Game Complete!</h2>
         <p className="text-body-lg text-warm-gray mb-2">Score: {score} points</p>
         <p className="text-body text-warm-gray-light mb-6">{getEncouragementMessage(accuracy, 'word-connection')}</p>
