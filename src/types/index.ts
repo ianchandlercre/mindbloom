@@ -40,11 +40,29 @@ export interface UserProfile {
   difficultyLevel: number; // 1-5
 }
 
-// ===== Survey =====
-export interface SurveyQuestion {
+// ===== Survey (Ranking-based) =====
+export type SurveyQuestionType = 'ranking' | 'scale';
+
+export interface RankingOption {
   id: string;
   text: string;
+  dimensionWeights: Partial<CognitiveProfile>;
+  interestTags: InterestArea[];
+}
+
+export interface SurveyQuestion {
+  id: string;
+  type: SurveyQuestionType;
+  text: string;
   subtitle?: string;
+  // For ranking questions
+  options?: RankingOption[];
+  // For scale questions
+  scaleMin?: number;
+  scaleMax?: number;
+  scaleMinLabel?: string;
+  scaleMaxLabel?: string;
+  // Legacy compatibility
   answers: SurveyAnswer[];
 }
 
@@ -59,6 +77,8 @@ export interface SurveyAnswer {
 export interface SurveyResponse {
   questionId: string;
   answerId: string;
+  rankings?: string[];
+  scaleValue?: number;
 }
 
 // ===== Games =====
@@ -75,6 +95,7 @@ export interface GameConfig {
   id: GameType;
   name: string;
   emoji: string;
+  icon?: string;
   description: string;
   shortDesc: string;
   primaryDimension: CognitiveDimension;

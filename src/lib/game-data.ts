@@ -10,7 +10,8 @@ export const GAME_CONFIGS: GameConfig[] = [
   {
     id: 'word-scramble',
     name: 'Word Scramble',
-    emoji: '🔤',
+    emoji: '',
+    icon: 'BookOpen',
     description: 'Unscramble letters to form words. Each puzzle is themed around your interests — history, nature, cooking, and more.',
     shortDesc: 'Unscramble letters into words',
     primaryDimension: 'verbal',
@@ -21,7 +22,8 @@ export const GAME_CONFIGS: GameConfig[] = [
   {
     id: 'word-connection',
     name: 'Word Connection',
-    emoji: '🔗',
+    emoji: '',
+    icon: 'Link2',
     description: 'Find the word that connects to the given clue. Strengthen your vocabulary and word associations.',
     shortDesc: 'Find the related word',
     primaryDimension: 'verbal',
@@ -32,7 +34,8 @@ export const GAME_CONFIGS: GameConfig[] = [
   {
     id: 'memory-match',
     name: 'Memory Match',
-    emoji: '🃏',
+    emoji: '',
+    icon: 'Grid3x3',
     description: 'Flip cards to find matching pairs. Themed card sets keep things fresh and fun.',
     shortDesc: 'Match pairs of cards',
     primaryDimension: 'memory',
@@ -43,7 +46,8 @@ export const GAME_CONFIGS: GameConfig[] = [
   {
     id: 'sequence-recall',
     name: 'Sequence Recall',
-    emoji: '🎵',
+    emoji: '',
+    icon: 'ListOrdered',
     description: 'Watch a sequence of colors light up, then repeat it from memory. The sequences grow longer as you improve.',
     shortDesc: 'Remember and repeat sequences',
     primaryDimension: 'memory',
@@ -54,7 +58,8 @@ export const GAME_CONFIGS: GameConfig[] = [
   {
     id: 'pattern-finder',
     name: 'Pattern Finder',
-    emoji: '🧩',
+    emoji: '',
+    icon: 'Puzzle',
     description: 'Spot the pattern in a sequence and choose what comes next. Great for logical thinking.',
     shortDesc: 'Complete the pattern',
     primaryDimension: 'logical',
@@ -65,7 +70,8 @@ export const GAME_CONFIGS: GameConfig[] = [
   {
     id: 'number-crunch',
     name: 'Number Crunch',
-    emoji: '🔢',
+    emoji: '',
+    icon: 'Calculator',
     description: 'Quick mental math challenges that adapt to your comfort level. No calculator needed!',
     shortDesc: 'Solve mental math puzzles',
     primaryDimension: 'logical',
@@ -76,7 +82,8 @@ export const GAME_CONFIGS: GameConfig[] = [
   {
     id: 'knowledge-quiz',
     name: 'Knowledge Quiz',
-    emoji: '🧠',
+    emoji: '',
+    icon: 'HelpCircle',
     description: 'Trivia questions drawn from your favorite topics. Learn fun facts while exercising your memory.',
     shortDesc: 'Answer trivia questions',
     primaryDimension: 'memory',
