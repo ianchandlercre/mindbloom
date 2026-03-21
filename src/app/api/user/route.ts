@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getProfile, getSessionStats, getGameSessions, getLatestAIAnalysis } from '@/lib/db';
 import { getRecommendedGames } from '@/lib/adaptive-engine';
-import { generateBrainTodayCard } from '@/lib/ai-service';
+import { getLatestInsight } from '@/lib/auto-research';
 import { RecommendedGame } from '@/types';
 
 export async function GET(request: NextRequest) {
@@ -59,22 +59,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (action === 'brain-today') {
-      const sessions = await getGameSessions(userId, 7);
-      if (sessions.length === 0) {
-        return NextResponse.json({ brainToday: null });
-      }
-      const recentSessions = sessions.map((s: any) => ({
-        gameType: s.game_type || s.gameType,
-        accuracy: s.accuracy,
-        duration: s.duration,
-        score: s.score,
-        createdAt: s.created_at || s.createdAt,
-      }));
-      const brainToday = await generateBrainTodayCard({
-        userId,
-        recentSessions,
-        profile: { interests: profile.interests, dimensions: profile.dimensions },
-      });
+      const brainToday = await getLatestInsight(userId, 'brain_today');
       return NextResponse.json({ brainToday });
     }
 

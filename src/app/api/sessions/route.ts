@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { saveGameSession, getGameSessions, getProfile, updateProfile, updateDifficulty } from '@/lib/db';
 import { updateDimensionScores, calculateDifficultyAdjustment } from '@/lib/adaptive-engine';
 import { GameType } from '@/types';
+import { runAutoResearch } from '@/lib/auto-research';
 
 export async function GET(request: NextRequest) {
   try {
@@ -57,6 +58,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    runAutoResearch({ userId, sessionId: id, gameType, accuracy: accuracy || 0, duration: duration || 0, difficulty: difficulty || 2, score: score || 0 });
     return NextResponse.json({ id, success: true });
   } catch (e) {
     console.error('Sessions POST error:', e);
