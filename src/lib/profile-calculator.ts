@@ -249,21 +249,21 @@ export function rankingsToResponses(
 ): SurveyResponse[] {
   const responses: SurveyResponse[] = [];
 
-  for (const [questionId, orderedIds] of rankings.entries()) {
+  Array.from(rankings.entries()).forEach(([questionId, orderedIds]) => {
     orderedIds.forEach((optionId, i) => {
       responses.push({
         questionId: `${questionId}_rank${i + 1}`,
         answerId: optionId,
       });
     });
-  }
+  });
 
-  for (const [questionId, value] of scales.entries()) {
+  Array.from(scales.entries()).forEach(([questionId, value]) => {
     responses.push({
       questionId,
       answerId: String(value),
     });
-  }
+  });
 
   return responses;
 }
