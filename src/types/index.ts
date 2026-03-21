@@ -41,24 +41,39 @@ export interface UserProfile {
 }
 
 // ===== Survey =====
-export interface SurveyQuestion {
-  id: string;
-  text: string;
-  subtitle?: string;
-  answers: SurveyAnswer[];
-}
 
+/** A single option the user can rank */
 export interface SurveyAnswer {
   id: string;
   text: string;
-  emoji: string;
+  icon?: string; // lucide-react icon name, optional
   dimensionWeights: Partial<CognitiveProfile>;
   interestTags: InterestArea[];
 }
 
+/**
+ * ranking: user taps items in order of preference (1st, 2nd, 3rd...)
+ * scale:   user picks a single value from a range of options
+ */
+export type SurveyQuestionType = 'ranking' | 'scale';
+
+export interface SurveyQuestion {
+  id: string;
+  text: string;
+  subtitle?: string;
+  type: SurveyQuestionType;
+  answers: SurveyAnswer[];
+  /** Minimum number of items that must be ranked before continuing (ranking type only) */
+  minRanks?: number;
+}
+
 export interface SurveyResponse {
   questionId: string;
+  /** For scale questions: the selected answerId.
+   *  For ranking questions: the top-ranked answerId (ranking[0]). */
   answerId: string;
+  /** Full ordered ranking (ranking questions only). ranking[0] = 1st choice. */
+  ranking?: string[];
 }
 
 // ===== Games =====

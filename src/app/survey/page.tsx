@@ -1,6 +1,7 @@
 'use client';
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { TreePine, Leaf } from 'lucide-react';
 import { useUser } from '@/hooks/useUser';
 import SurveyFlow from '@/components/survey/SurveyFlow';
 
@@ -17,9 +18,11 @@ export default function SurveyPage() {
   if (loading || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-cream">
-        <div className="text-center">
-          <div className="text-6xl mb-4 animate-pulse-gentle">🌱</div>
-          <p className="text-body-lg text-warm-gray-light">Loading...</p>
+        <div className="text-center animate-fade-in">
+          <div className="w-16 h-16 rounded-full bg-forest-100 flex items-center justify-center mx-auto mb-4 animate-pulse-gentle">
+            <Leaf className="w-8 h-8 text-forest-600" />
+          </div>
+          <p className="text-body-lg text-stone-500">Loading...</p>
         </div>
       </div>
     );
@@ -32,19 +35,23 @@ export default function SurveyPage() {
 
   return (
     <div className="min-h-screen bg-cream">
+
       {/* Header */}
-      <header className="sticky top-0 bg-cream/95 backdrop-blur-sm border-b border-cream-dark z-10">
+      <header className="sticky top-0 z-20 bg-forest-800 border-b border-forest-700">
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-2xl">🌱</span>
-            <span className="text-body font-bold text-warm-gray">MindBloom</span>
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-forest-600/40 flex items-center justify-center">
+              <TreePine className="w-5 h-5 text-forest-300" />
+            </div>
+            <span className="text-body font-bold text-white">MindBloom</span>
           </div>
-          <span className="text-body text-warm-gray-light">Getting to know you, {user.name}...</span>
+          <span className="text-forest-300 text-body font-medium">
+            Getting to know you, {user.name}
+          </span>
         </div>
       </header>
 
-      {/* Survey */}
-      <main className="max-w-4xl mx-auto px-4 py-8">
+      <main className="max-w-2xl mx-auto px-4 py-8">
         <SurveyFlow userId={user.id} onComplete={handleComplete} />
       </main>
     </div>
