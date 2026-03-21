@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
         const user = await createUser(name.trim(), pin);
         return NextResponse.json({ user });
       } catch (e: any) {
-        if (e.message?.includes('UNIQUE')) {
+        if (e.message?.includes('UNIQUE') || e.message?.includes('unique') || e.code === '23505') {
           return NextResponse.json({ error: 'That name is already taken' }, { status: 400 });
         }
         throw e;
