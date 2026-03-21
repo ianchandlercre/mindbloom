@@ -13,15 +13,20 @@ interface Props {
   totalRounds: number;
   score: number;
   isComplete: boolean;
+  initialRounds?: any[];
 }
 
-export default function WordConnection({ difficulty, interests, onAnswer, onComplete, currentRound, totalRounds, score, isComplete }: Props) {
+export default function WordConnection({ difficulty, interests, onAnswer, onComplete, currentRound, totalRounds, score, isComplete, initialRounds }: Props) {
   const [rounds, setRounds] = useState<WordConnectionRound[]>([]);
   const [feedback, setFeedback] = useState<{ correct: boolean; selectedIndex: number; message: string } | null>(null);
 
   useEffect(() => {
-    setRounds(getWordConnectionRounds(difficulty, interests, totalRounds));
-  }, [difficulty, interests, totalRounds]);
+    if (initialRounds && initialRounds.length > 0) {
+      setRounds(initialRounds as WordConnectionRound[]);
+    } else {
+      setRounds(getWordConnectionRounds(difficulty, interests, totalRounds));
+    }
+  }, [difficulty, interests, totalRounds, initialRounds]);
 
   const round = rounds[currentRound];
 

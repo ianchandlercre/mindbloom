@@ -13,15 +13,20 @@ interface Props {
   totalRounds: number;
   score: number;
   isComplete: boolean;
+  initialRounds?: any[];
 }
 
-export default function KnowledgeQuiz({ difficulty, interests, onAnswer, onComplete, currentRound, totalRounds, score, isComplete }: Props) {
+export default function KnowledgeQuiz({ difficulty, interests, onAnswer, onComplete, currentRound, totalRounds, score, isComplete, initialRounds }: Props) {
   const [rounds, setRounds] = useState<KnowledgeQuizRound[]>([]);
   const [feedback, setFeedback] = useState<{ correct: boolean; message: string; funFact: string } | null>(null);
 
   useEffect(() => {
-    setRounds(getKnowledgeQuizRounds(difficulty, interests, totalRounds));
-  }, [difficulty, interests, totalRounds]);
+    if (initialRounds && initialRounds.length > 0) {
+      setRounds(initialRounds as KnowledgeQuizRound[]);
+    } else {
+      setRounds(getKnowledgeQuizRounds(difficulty, interests, totalRounds));
+    }
+  }, [difficulty, interests, totalRounds, initialRounds]);
 
   const round = rounds[currentRound];
 

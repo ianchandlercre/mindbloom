@@ -13,9 +13,10 @@ interface Props {
   totalRounds: number;
   score: number;
   isComplete: boolean;
+  initialRounds?: any[];
 }
 
-export default function WordScramble({ difficulty, interests, onAnswer, onComplete, currentRound, totalRounds, score, isComplete }: Props) {
+export default function WordScramble({ difficulty, interests, onAnswer, onComplete, currentRound, totalRounds, score, isComplete, initialRounds }: Props) {
   const [rounds, setRounds] = useState<WordScrambleRound[]>([]);
   const [input, setInput] = useState('');
   const [showHint, setShowHint] = useState(false);
@@ -23,8 +24,18 @@ export default function WordScramble({ difficulty, interests, onAnswer, onComple
   const [hintUsed, setHintUsed] = useState(false);
 
   useEffect(() => {
-    setRounds(getWordScrambleRounds(difficulty, interests, totalRounds));
-  }, [difficulty, interests, totalRounds]);
+    if (initialRounds && initialRounds.length > 0) {
+      // AI rounds for word scramble need a scrambled version generated client-side
+      setRounds(initialRounds.map((r: any) => ({
+        word: r.word?.toUpperCase() || r.word,
+        scrambled: r.scrambled || r.word?.toUpperCase().split('').sort(() => Math.random() - 0.5).join('') || '',
+        hint: r.hint || '',
+        category: r.category || 'general',
+      })) as WordScrambleRound[]);
+    } else {
+      setRounds(getWordScrambleRounds(difficulty, interests, totalRounds));
+    }
+  }, [difficulty, interests, totalRounds, initialRounds]);
 
   const round = rounds[currentRound];
 

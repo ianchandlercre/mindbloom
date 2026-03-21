@@ -10,7 +10,7 @@ import GameCard from '@/components/dashboard/GameCard';
 export default function DashboardPage() {
   const router = useRouter();
   const { user, profile, loading: userLoading, logout } = useUser();
-  const { recommendations, stats, loading: dataLoading } = useAdaptive(user?.id, profile);
+  const { recommendations, stats, aiInsights, aiEncouragement, lastSessionSummary, loading: dataLoading } = useAdaptive(user?.id, profile);
 
   useEffect(() => {
     if (!userLoading && !user) {
@@ -56,7 +56,7 @@ export default function DashboardPage() {
 
       <main className="max-w-4xl mx-auto px-4 py-8">
         {/* Greeting */}
-        <div className="mb-8 animate-fade-in">
+        <div className="mb-6 animate-fade-in">
           <h1 className="text-heading-lg font-bold text-warm-gray mb-2">{greeting} 🌸</h1>
           {stats && stats.streak > 0 && (
             <p className="text-body-lg text-amber-dark">
@@ -76,7 +76,32 @@ export default function DashboardPage() {
           )}
         </div>
 
-        {/* Quick Actions */}
+        {/* AI Last Session Summary */}
+        {lastSessionSummary && (
+          <div className="mb-4 p-4 bg-white rounded-warm-lg shadow-warm border-l-4 border-soft-blue animate-fade-in">
+            <p className="text-sm text-warm-gray-light mb-1 font-medium">Last Session</p>
+            <p className="text-body text-warm-gray">{lastSessionSummary}</p>
+          </div>
+        )}
+
+        {/* AI Encouragement / Insights */}
+        {(aiEncouragement || aiInsights) && (
+          <div className="mb-6 p-5 bg-soft-blue/5 border border-soft-blue/20 rounded-warm-lg animate-fade-in">
+            <div className="flex items-start gap-3">
+              <span className="text-2xl">✨</span>
+              <div>
+                {aiEncouragement && (
+                  <p className="text-body text-warm-gray mb-1">{aiEncouragement}</p>
+                )}
+                {aiInsights && aiInsights !== aiEncouragement && (
+                  <p className="text-body text-warm-gray-light italic">{aiInsights}</p>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Complete Profile Banner */}
         {profile && profile.interests.length === 0 && (
           <Link href="/survey">
             <div className="mb-6 p-5 bg-amber/10 border-2 border-amber/30 rounded-warm-lg cursor-pointer hover:bg-amber/20 transition-colors animate-slide-up">
