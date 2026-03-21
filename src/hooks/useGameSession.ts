@@ -15,6 +15,7 @@ export function useGameSession(userId: number, gameType: GameType, difficulty: n
   const [showFeedback, setShowFeedback] = useState(false);
   const [sessionId, setSessionId] = useState<number | null>(null);
   const [aiEncouragement, setAiEncouragement] = useState<string | null>(null);
+  const [sessionDuration, setSessionDuration] = useState(0);
   const savedRef = useRef(false);
 
   const startGame = useCallback((totalRounds = 8) => {
@@ -29,6 +30,7 @@ export function useGameSession(userId: number, gameType: GameType, difficulty: n
     });
     setShowFeedback(false);
     setAiEncouragement(null);
+    setSessionDuration(0);
     savedRef.current = false;
     setSessionId(null);
   }, []);
@@ -57,6 +59,7 @@ export function useGameSession(userId: number, gameType: GameType, difficulty: n
     savedRef.current = true;
 
     const duration = Math.round((Date.now() - gameState.startTime) / 1000);
+    setSessionDuration(duration);
     const totalAnswered = gameState.correct + gameState.incorrect;
     const accuracy = totalAnswered > 0 ? Math.round((gameState.correct / totalAnswered) * 100) : 0;
 
@@ -78,15 +81,17 @@ export function useGameSession(userId: number, gameType: GameType, difficulty: n
     } catch (e) {
       console.error('Failed to save session:', e);
     }
-
-    setShowFeedback(true);
+    // Do NOT auto-show survey — let the completion screen offer it
   }, [gameState, userId, gameType, difficulty]);
 
+  const showSurvey = useCallback(() => {
+    setShowFeedback(true);
+  }, []);
+
   const submitFeedback = useCallback(async (feedback: GameFeedback) => {
-    if (!sessionId) {
-      setShowFeedback(false);
-      return;
-    }
+    // Close survey immediately so user returns to results screen right away
+    setShowFeedback(false);
+    if (!sessionId) return;
     try {
       const res = await fetch('/api/feedback', {
         method: 'POST',
@@ -100,7 +105,6 @@ export function useGameSession(userId: number, gameType: GameType, difficulty: n
     } catch (e) {
       console.error('Failed to save feedback:', e);
     }
-    setShowFeedback(false);
   }, [sessionId, userId]);
 
   const accuracy = gameState.correct + gameState.incorrect > 0
@@ -110,11 +114,13 @@ export function useGameSession(userId: number, gameType: GameType, difficulty: n
   return {
     gameState,
     accuracy,
+    sessionDuration,
     showFeedback,
     aiEncouragement,
     startGame,
     recordAnswer,
     completeGame,
+    showSurvey,
     submitFeedback,
   };
 }

@@ -22,14 +22,30 @@ interface Props {
   initialRounds?: any[];
 }
 
-export default function MemoryJourney({ difficulty, interests, onAnswer, onComplete, score, isComplete, initialRounds }: Props) {
+// Warm, distinct colors for matched pair groups
+const PAIR_COLORS = [
+  { bg: '#fef3c7', border: '#f59e0b', text: '#92400e' }, // amber
+  { bg: '#d1fae5', border: '#10b981', text: '#065f46' }, // emerald
+  { bg: '#dbeafe', border: '#3b82f6', text: '#1e40af' }, // blue
+  { bg: '#fce7f3', border: '#ec4899', text: '#9d174d' }, // pink
+  { bg: '#ede9fe', border: '#8b5cf6', text: '#4c1d95' }, // violet
+  { bg: '#fde68a', border: '#f59e0b', text: '#78350f' }, // yellow
+  { bg: '#cffafe', border: '#06b6d4', text: '#155e75' }, // cyan
+  { bg: '#fee2e2', border: '#ef4444', text: '#991b1b' }, // red
+];
+
+export default function MemoryJourney({
+  difficulty, interests, onAnswer, onComplete, score, isComplete, initialRounds,
+}: Props) {
   const [cards, setCards] = useState<Card[]>([]);
   const [flipped, setFlipped] = useState<number[]>([]);
   const [matched, setMatched] = useState<number[]>([]);
+  const [matchedPairIds, setMatchedPairIds] = useState<number[]>([]);
   const [checking, setChecking] = useState(false);
   const [attempts, setAttempts] = useState(0);
   const [matchCount, setMatchCount] = useState(0);
-  const [message, setMessage] = useState('');
+  const [lastResult, setLastResult] = useState<'match' | 'miss' | null>(null);
+  const [animatingCards, setAnimatingCards] = useState<number[]>([]);
 
   const buildCards = useCallback(() => {
     const pairs = getMemoryJourneyCards(difficulty, interests);
@@ -50,12 +66,15 @@ export default function MemoryJourney({ difficulty, interests, onAnswer, onCompl
     setCards(buildCards());
     setFlipped([]);
     setMatched([]);
+    setMatchedPairIds([]);
     setAttempts(0);
     setMatchCount(0);
-    setMessage('');
+    setLastResult(null);
+    setAnimatingCards([]);
   }, [buildCards]);
 
   const totalPairs = cards.length / 2;
+  const accuracy = attempts > 0 ? Math.round((matchCount / attempts) * 100) : 0;
 
   const handleCardTap = useCallback((cardId: number) => {
     if (checking) return;
@@ -73,28 +92,31 @@ export default function MemoryJourney({ difficulty, interests, onAnswer, onCompl
       const [id1, id2] = newFlipped;
       const card1 = cards.find(c => c.id === id1);
       const card2 = cards.find(c => c.id === id2);
-
       const isMatch = card1 && card2 && card1.pairId === card2.pairId && card1.id !== card2.id;
 
       setTimeout(() => {
         if (isMatch) {
           const newMatched = [...matched, id1, id2];
           setMatched(newMatched);
+          setMatchedPairIds(prev => [...prev, card1.pairId]);
           setMatchCount(prev => prev + 1);
-          setMessage('Match found!');
+          setLastResult('match');
+          setAnimatingCards([id1, id2]);
           onAnswer(true, 50);
 
+          setTimeout(() => setAnimatingCards([]), 600);
+
           if (newMatched.length === cards.length) {
-            setTimeout(() => onComplete(), 800);
+            setTimeout(() => onComplete(), 1000);
           }
         } else {
-          setMessage('Not a match — keep looking!');
+          setLastResult('miss');
           onAnswer(false, 0);
         }
         setFlipped([]);
         setChecking(false);
-        setTimeout(() => setMessage(''), 1500);
-      }, 1000);
+        setTimeout(() => setLastResult(null), 1200);
+      }, 900);
     }
   }, [checking, matched, flipped, cards, onAnswer, onComplete]);
 
@@ -107,82 +129,123 @@ export default function MemoryJourney({ difficulty, interests, onAnswer, onCompl
   }
 
   const pairsLeft = totalPairs - matchCount;
+  const cols = cards.length <= 8 ? 'grid-cols-2 sm:grid-cols-4' : 'grid-cols-3 sm:grid-cols-4';
 
   return (
     <div className="max-w-2xl mx-auto">
-      {/* Stats row */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="text-body text-warm-gray-light">
-          <span className="font-semibold text-warm-gray">{matchCount}</span> of {totalPairs} pairs found
+      {/* Stats bar */}
+      <div className="flex items-center justify-between mb-4 px-1">
+        <div className="bg-white rounded-warm shadow-warm px-4 py-2 text-center">
+          <p className="text-heading font-bold text-warm-gray">{matchCount}</p>
+          <p className="text-sm text-warm-gray-light">matched</p>
         </div>
-        <div className="text-body text-warm-gray-light">
-          {attempts} attempt{attempts !== 1 ? 's' : ''}
+        <div className="flex-1 mx-4">
+          {/* Progress dots */}
+          <div className="flex items-center justify-center gap-2 mb-1">
+            {Array.from({ length: totalPairs }).map((_, i) => (
+              <div
+                key={i}
+                className="w-3 h-3 rounded-full transition-all duration-300"
+                style={{
+                  backgroundColor: i < matchCount
+                    ? PAIR_COLORS[i % PAIR_COLORS.length].border
+                    : '#e0ceb6',
+                  transform: i < matchCount ? 'scale(1.2)' : 'scale(1)',
+                }}
+              />
+            ))}
+          </div>
+          <p className="text-sm text-center text-warm-gray-light">
+            {pairsLeft > 0 ? `${pairsLeft} pair${pairsLeft !== 1 ? 's' : ''} to find` : 'All found!'}
+          </p>
         </div>
-        <div className="text-body font-semibold text-warm-gray">
-          Score: {score}
+        <div className="bg-white rounded-warm shadow-warm px-4 py-2 text-center">
+          <p className="text-heading font-bold text-warm-gray">{attempts}</p>
+          <p className="text-sm text-warm-gray-light">tries</p>
         </div>
       </div>
 
-      {/* Progress */}
-      <div className="h-2 bg-cream-dark rounded-full mb-6 overflow-hidden">
-        <div
-          className="h-full bg-sage rounded-full transition-all duration-500"
-          style={{ width: `${(matchCount / totalPairs) * 100}%` }}
-        />
+      {/* Feedback message */}
+      <div className="h-12 flex items-center justify-center mb-3">
+        {lastResult === 'match' && (
+          <div className="px-6 py-2 bg-green-100 text-green-800 rounded-warm font-semibold text-body animate-scale-in border border-green-300">
+            Match found!
+          </div>
+        )}
+        {lastResult === 'miss' && (
+          <div className="px-6 py-2 bg-amber/20 text-amber-dark rounded-warm font-medium text-body animate-fade-in border border-amber/40">
+            Not quite — keep looking!
+          </div>
+        )}
+        {!lastResult && pairsLeft > 0 && (
+          <p className="text-body text-warm-gray-light text-center">
+            Flip two cards to find a matching pair
+          </p>
+        )}
       </div>
-
-      {/* Instruction */}
-      <div className="mb-6 p-4 bg-soft-blue/5 border border-soft-blue/20 rounded-warm-lg">
-        <p className="text-body text-warm-gray">
-          Tap two cards to find matching pairs. Each word is paired with a related term.
-          {pairsLeft > 0 && ` ${pairsLeft} pair${pairsLeft !== 1 ? 's' : ''} remaining.`}
-        </p>
-      </div>
-
-      {/* Message */}
-      {message && (
-        <div className={`mb-4 p-3 rounded-warm text-center text-body font-medium animate-fade-in ${
-          message.includes('Match') ? 'bg-green-100 text-green-800' : 'bg-amber/20 text-amber-dark'
-        }`}>
-          {message}
-        </div>
-      )}
 
       {/* Card grid */}
-      <div className={`grid gap-3 ${
-        cards.length <= 8 ? 'grid-cols-2 sm:grid-cols-4' : 'grid-cols-3 sm:grid-cols-4'
-      }`}>
+      <div className={`grid gap-3 ${cols}`}>
         {cards.map((card) => {
           const isFlippedCard = flipped.includes(card.id);
           const isMatchedCard = matched.includes(card.id);
+          const isAnimating = animatingCards.includes(card.id);
           const isVisible = isFlippedCard || isMatchedCard;
+          const pairColor = isMatchedCard
+            ? PAIR_COLORS[card.pairId % PAIR_COLORS.length]
+            : null;
 
           return (
-            <button
-              key={card.id}
-              onClick={() => handleCardTap(card.id)}
-              disabled={isMatchedCard || checking}
-              className={`relative aspect-square rounded-warm-lg border-2 transition-all duration-300 flex items-center justify-center p-3 min-h-[90px] ${
-                isMatchedCard
-                  ? 'border-sage bg-sage/15 cursor-default'
-                  : isFlippedCard
-                  ? 'border-soft-blue bg-soft-blue/10'
-                  : 'border-cream-dark bg-white hover:border-soft-blue/50 hover:bg-cream cursor-pointer'
-              }`}
-            >
-              {isVisible ? (
-                <span className={`text-center leading-tight font-semibold ${
-                  cards.length <= 8 ? 'text-body' : 'text-sm'
-                } ${isMatchedCard ? 'text-sage-dark' : 'text-warm-gray'}`}>
-                  {card.label}
-                </span>
-              ) : (
-                <div className="w-8 h-8 rounded-full bg-cream-dark" />
-              )}
-            </button>
+            <div key={card.id} className="card-flip-container" style={{ height: '100px' }}>
+              <div className={`card-flip-inner ${isVisible ? 'flipped' : ''} ${isAnimating ? 'animate-match-pop' : ''}`}
+                style={{ height: '100px' }}>
+                {/* Face down */}
+                <div
+                  className="card-face cursor-pointer border-2 transition-colors"
+                  style={{
+                    backgroundColor: '#faf7f0',
+                    borderColor: isFlippedCard ? '#3d8b3d' : '#e0ceb6',
+                  }}
+                  onClick={() => !isMatchedCard && handleCardTap(card.id)}
+                >
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: '#e0ceb6' }}>
+                    <div className="w-4 h-4 rounded-full" style={{ backgroundColor: '#ae7d4f' }} />
+                  </div>
+                </div>
+
+                {/* Face up */}
+                <div
+                  className="card-face card-face-back border-2 transition-all"
+                  style={isMatchedCard && pairColor ? {
+                    backgroundColor: pairColor.bg,
+                    borderColor: pairColor.border,
+                  } : {
+                    backgroundColor: '#eff6ff',
+                    borderColor: '#3b82f6',
+                  }}
+                >
+                  <span
+                    className="text-center leading-tight font-bold px-2"
+                    style={{
+                      fontSize: card.label.length > 8 ? '14px' : '16px',
+                      color: isMatchedCard && pairColor ? pairColor.text : '#1e40af',
+                    }}
+                  >
+                    {card.label}
+                  </span>
+                </div>
+              </div>
+            </div>
           );
         })}
       </div>
+
+      {/* Category hint */}
+      {cards.length > 0 && (
+        <p className="text-center text-sm text-warm-gray-light mt-6">
+          Each word is paired with a closely related term
+        </p>
+      )}
     </div>
   );
 }
