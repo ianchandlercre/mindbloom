@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { WordConnectionRound, InterestArea } from '@/types';
 import { getWordConnectionRounds } from '@/lib/game-data';
 import { getEncouragementMessage } from '@/lib/adaptive-engine';
+import { CheckCircle, XCircle, Trophy } from 'lucide-react';
 
 interface Props {
   difficulty: number;
@@ -34,8 +35,8 @@ export default function WordConnection({ difficulty, interests, onAnswer, onComp
     if (feedback || !round) return;
     const isCorrect = index === round.correctIndex;
     const message = isCorrect
-      ? '✅ That\'s right!'
-      : `❌ The answer was: ${round.options[round.correctIndex]}`;
+      ? 'That\'s right!'
+      : `The answer was: ${round.options[round.correctIndex]}`;
 
     setFeedback({ correct: isCorrect, selectedIndex: index, message });
     onAnswer(isCorrect);
@@ -54,7 +55,7 @@ export default function WordConnection({ difficulty, interests, onAnswer, onComp
     const accuracy = totalRounds > 0 ? Math.round((score / (totalRounds * 10)) * 100) : 0;
     return (
       <div className="text-center py-8 animate-fade-in">
-        <div className="text-6xl mb-4">🎉</div>
+        <div className="flex justify-center mb-4"><Trophy size={64} className="text-amber-500" /></div>
         <h2 className="text-heading font-bold text-warm-gray mb-3">Game Complete!</h2>
         <p className="text-body-lg text-warm-gray mb-2">Score: {score} points</p>
         <p className="text-body text-warm-gray-light mb-6">{getEncouragementMessage(accuracy, 'word-connection')}</p>
@@ -107,7 +108,10 @@ export default function WordConnection({ difficulty, interests, onAnswer, onComp
         <div className={`mt-6 p-4 rounded-warm text-center text-body-lg font-medium animate-scale-in ${
           feedback.correct ? 'bg-sage/20 text-sage-dark' : 'bg-red-100 text-red-700'
         }`}>
-          {feedback.message}
+          {feedback.correct
+            ? <><CheckCircle size={18} className="inline mr-1" />{feedback.message}</>
+            : <><XCircle size={18} className="inline mr-1" />{feedback.message}</>
+          }
         </div>
       )}
     </div>

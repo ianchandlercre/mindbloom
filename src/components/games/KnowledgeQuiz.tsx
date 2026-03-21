@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { KnowledgeQuizRound, InterestArea } from '@/types';
 import { getKnowledgeQuizRounds } from '@/lib/game-data';
 import { getEncouragementMessage } from '@/lib/adaptive-engine';
+import { CheckCircle, XCircle, Lightbulb, Trophy } from 'lucide-react';
 
 interface Props {
   difficulty: number;
@@ -33,7 +34,7 @@ export default function KnowledgeQuiz({ difficulty, interests, onAnswer, onCompl
   const handleSelect = (index: number) => {
     if (feedback || !round) return;
     const isCorrect = index === round.correctIndex;
-    const message = isCorrect ? '✅ That\'s right!' : `❌ The answer is: ${round.options[round.correctIndex]}`;
+    const message = isCorrect ? 'That\'s right!' : `The answer is: ${round.options[round.correctIndex]}`;
 
     setFeedback({ correct: isCorrect, message, funFact: round.funFact });
     onAnswer(isCorrect);
@@ -52,7 +53,7 @@ export default function KnowledgeQuiz({ difficulty, interests, onAnswer, onCompl
     const accuracy = totalRounds > 0 ? Math.round((score / (totalRounds * 10)) * 100) : 0;
     return (
       <div className="text-center py-8 animate-fade-in">
-        <div className="text-6xl mb-4">🎉</div>
+        <div className="flex justify-center mb-4"><Trophy size={64} className="text-amber-500" /></div>
         <h2 className="text-heading font-bold text-warm-gray mb-3">Quiz Complete!</h2>
         <p className="text-body-lg text-warm-gray mb-2">Score: {score} points</p>
         <p className="text-body text-warm-gray-light mb-6">{getEncouragementMessage(accuracy, 'knowledge-quiz')}</p>
@@ -111,10 +112,14 @@ export default function KnowledgeQuiz({ difficulty, interests, onAnswer, onCompl
           <p className={`text-body-lg font-medium mb-2 ${
             feedback.correct ? 'text-sage-dark' : 'text-red-700'
           }`}>
-            {feedback.message}
+            {feedback.correct
+            ? <><CheckCircle size={18} className="inline mr-1" />{feedback.message}</>
+            : <><XCircle size={18} className="inline mr-1" />{feedback.message}</>
+          }
           </p>
-          <p className="text-body text-warm-gray">
-            💡 {feedback.funFact}
+          <p className="text-body text-warm-gray flex items-start gap-2">
+            <Lightbulb size={16} className="mt-1 flex-shrink-0 text-amber-500" />
+            {feedback.funFact}
           </p>
         </div>
       )}

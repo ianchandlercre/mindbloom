@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { saveGameSession, getGameSessions, getProfile, updateProfile, updateDifficulty } from '@/lib/db';
+import { saveGameSession, getGameSessions, getProfile, updateProfile, updateDifficulty, saveAIAnalysis, getSurveyResponses, getUserSessionCount } from '@/lib/db';
 import { updateDimensionScores, calculateDifficultyAdjustment } from '@/lib/adaptive-engine';
+import { runSessionPipeline } from '@/lib/ai-service';
 import { GameType } from '@/types';
 
 export async function GET(request: NextRequest) {
@@ -55,6 +56,53 @@ export async function POST(request: NextRequest) {
           await updateDifficulty(userId, adjustment.newDifficulty);
         }
       }
+    }
+
+    // Fire off AI analysis in the background — don't await, user shouldn't wait
+    if (profile) {
+      (async () => {
+        try {
+          const [surveyResponses, sessionCount, allSessions] = await Promise.all([
+            getSurveyResponses(userId),
+            getUserSessionCount(userId),
+            getGameSessions(userId, 20),
+          ]);
+          const history = allSessions.map((s: any) => ({
+            gameType: s.game_type || s.gameType,
+            accuracy: s.accuracy,
+            difficulty: s.difficulty,
+            score: s.score,
+            feedback: s.feedback,
+            createdAt: s.created_at,
+          }));
+          const analysis = await runSessionPipeline({
+            userId,
+            sessionId: id,
+            gameType: gameType as GameType,
+            accuracy: accuracy || 0,
+            duration: duration || 0,
+            difficulty: difficulty || 2,
+            score: score || 0,
+            feedback: undefined,
+            recentHistory: history,
+            profile: {
+              dimensions: profile.dimensions,
+              interests: profile.interests,
+              difficultyLevel: profile.difficultyLevel,
+            },
+            surveyResponses: surveyResponses as Array<{ question_id: string; answer_id: string }>,
+            sessionCount,
+          });
+          await saveAIAnalysis(userId, id, {
+            encouragement: analysis.encouragement,
+            sessionSummary: analysis.sessionSummary,
+            gameRecommendations: analysis.gameRecommendations,
+            insights: analysis.insights,
+          });
+        } catch (err) {
+          console.error('Background AI analysis failed:', err);
+        }
+      })();
     }
 
     return NextResponse.json({ id, success: true });
