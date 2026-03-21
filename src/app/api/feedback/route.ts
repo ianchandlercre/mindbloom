@@ -12,6 +12,7 @@ export async function POST(request: NextRequest) {
 
     await sql`UPDATE game_sessions SET feedback = ${JSON.stringify(feedback)} WHERE id = ${sessionId}`;
 
+    // Return any already-stored AI analysis (generated async by sessions route)
     if (userId) {
       const aiAnalysis = await getLatestAIAnalysis(userId);
       if (aiAnalysis) {

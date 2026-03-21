@@ -58,7 +58,9 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Fire off AI analysis in the background — user sees completion screen immediately
     runAutoResearch({ userId, sessionId: id, gameType, accuracy: accuracy || 0, duration: duration || 0, difficulty: difficulty || 2, score: score || 0 });
+
     return NextResponse.json({ id, success: true });
   } catch (e) {
     console.error('Sessions POST error:', e);
