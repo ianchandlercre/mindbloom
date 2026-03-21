@@ -77,6 +77,12 @@ export default function GamePage() {
     if (user?.id && config) fetchAIContent();
   }, [user?.id, config, fetchAIContent]);
 
+  useEffect(() => {
+    if (started && gameState.isComplete) {
+      completeGame();
+    }
+  }, [gameState.isComplete, started, completeGame]);
+
   if (loading || !user || !config) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-cream">
