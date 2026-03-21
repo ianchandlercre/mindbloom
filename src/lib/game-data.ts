@@ -169,6 +169,48 @@ export const STORY_PASSAGES: Record<string, StoryPassage[]> = {
         { sentenceIndex: 3, issue: 'Iron was not widely used in ancient Egypt during pyramid construction — copper and stone tools were used instead.' },
       ],
     },
+    {
+      theme: 'history',
+      passage: 'The Apollo 11 mission successfully landed humans on the Moon for the first time on July 20, 1969. Neil Armstrong was the first person to step onto the lunar surface, followed by Buzz Aldrin. The third crew member, Michael Collins, also walked on the Moon while his colleagues gathered rock samples. Armstrong and Aldrin spent about two and a half hours exploring outside the spacecraft.',
+      sentences: [
+        'The Apollo 11 mission successfully landed humans on the Moon for the first time on July 20, 1969.',
+        'Neil Armstrong was the first person to step onto the lunar surface, followed by Buzz Aldrin.',
+        'The third crew member, Michael Collins, also walked on the Moon while his colleagues gathered rock samples.',
+        'Armstrong and Aldrin spent about two and a half hours exploring outside the spacecraft.',
+      ],
+      errorIndices: [2],
+      errors: [
+        { sentenceIndex: 2, issue: 'Michael Collins did not walk on the Moon — he remained in lunar orbit aboard the command module Columbia throughout the mission.' },
+      ],
+    },
+    {
+      theme: 'history',
+      passage: 'The Berlin Wall divided the city of Berlin from 1961 to 1989. It was built by the East German government to prevent its citizens from fleeing to West Berlin. The wall stretched approximately 155 kilometres and was guarded by armed soldiers. On November 9, 1989, the East German government announced that citizens could cross freely, and jubilant crowds began tearing the wall down.',
+      sentences: [
+        'The Berlin Wall divided the city of Berlin from 1961 to 1989.',
+        'It was built by the East German government to prevent its citizens from fleeing to West Berlin.',
+        'The wall stretched approximately 155 kilometres and was guarded by armed soldiers.',
+        'On November 9, 1989, the East German government announced that citizens could cross freely, and jubilant crowds began tearing the wall down.',
+      ],
+      errorIndices: [0],
+      errors: [
+        { sentenceIndex: 0, issue: 'The Berlin Wall divided the entire country of Germany, not just the city — East and West Germany were the two nations, with Berlin itself also divided.' },
+      ],
+    },
+    {
+      theme: 'history',
+      passage: 'The Titanic was a British ocean liner that sank in the North Atlantic Ocean on April 15, 1912, after colliding with an iceberg. The ship was on its maiden voyage from Southampton to New York City. It was considered unsinkable due to its design of sixteen watertight compartments. More than 1,500 people died, making it one of the deadliest peacetime maritime disasters.',
+      sentences: [
+        'The Titanic was a British ocean liner that sank in the North Atlantic Ocean on April 15, 1912, after colliding with an iceberg.',
+        'The ship was on its maiden voyage from Southampton to New York City.',
+        'It was considered unsinkable due to its design of sixteen watertight compartments.',
+        'More than 1,500 people died, making it one of the deadliest peacetime maritime disasters.',
+      ],
+      errorIndices: [2],
+      errors: [
+        { sentenceIndex: 2, issue: "The Titanic had sixteen watertight compartments, which is correct, but the ship could float with four flooded — it was never officially advertised as 'unsinkable'; that claim was exaggerated by the press." },
+      ],
+    },
   ],
   nature: [
     {
@@ -183,6 +225,48 @@ export const STORY_PASSAGES: Record<string, StoryPassage[]> = {
       errorIndices: [3],
       errors: [
         { sentenceIndex: 3, issue: 'No single monarch makes the full round trip — it takes multiple generations. The butterflies that return south are the great-grandchildren of those who flew north.' },
+      ],
+    },
+    {
+      theme: 'nature',
+      passage: 'The giant redwood trees of California are the largest living organisms on Earth by volume. The tallest known redwood, named Hyperion, stands over 115 metres tall and is found in Redwood National Park. These ancient trees can live for more than 2,000 years and their thick bark is highly resistant to fire and disease. Redwoods depend on the coastal fog of California for much of their water supply.',
+      sentences: [
+        'The giant redwood trees of California are the largest living organisms on Earth by volume.',
+        'The tallest known redwood, named Hyperion, stands over 115 metres tall and is found in Redwood National Park.',
+        'These ancient trees can live for more than 2,000 years and their thick bark is highly resistant to fire and disease.',
+        'Redwoods depend on the coastal fog of California for much of their water supply.',
+      ],
+      errorIndices: [0],
+      errors: [
+        { sentenceIndex: 0, issue: "The giant sequoia is the largest living organism by volume, not the redwood. The coast redwood (Sequoia sempervirens) is the world's tallest tree, while the giant sequoia (Sequoiadendron giganteum) is the largest by volume." },
+      ],
+    },
+    {
+      theme: 'nature',
+      passage: 'The humpback whale is famous for its haunting and complex songs, which can last for up to 20 minutes and be heard underwater from great distances. Only male humpbacks sing, and all males in the same ocean basin sing the same song, which slowly evolves over the season. Humpbacks can grow up to 16 metres long and weigh as much as 30 tonnes. They migrate thousands of miles between cold polar feeding grounds and warm tropical breeding areas each year.',
+      sentences: [
+        'The humpback whale is famous for its haunting and complex songs, which can last for up to 20 minutes and be heard underwater from great distances.',
+        'Only male humpbacks sing, and all males in the same ocean basin sing the same song, which slowly evolves over the season.',
+        'Humpbacks can grow up to 16 metres long and weigh as much as 30 tonnes.',
+        'They migrate thousands of miles between cold polar feeding grounds and warm tropical breeding areas each year.',
+      ],
+      errorIndices: [2],
+      errors: [
+        { sentenceIndex: 2, issue: 'Humpback whales can grow up to about 16 metres long, which is correct, but they can weigh up to 40 tonnes — not 30 tonnes.' },
+      ],
+    },
+    {
+      theme: 'nature',
+      passage: 'The Amazon rainforest is often called the "lungs of the Earth" because it produces a significant portion of the world\'s oxygen. It spans nine countries in South America, with the majority located in Brazil. The Amazon River, which flows through the forest, is the longest river in the world by volume of water discharged. The rainforest is home to an estimated 10% of all species on Earth.',
+      sentences: [
+        'The Amazon rainforest is often called the "lungs of the Earth" because it produces a significant portion of the world\'s oxygen.',
+        'It spans nine countries in South America, with the majority located in Brazil.',
+        'The Amazon River, which flows through the forest, is the longest river in the world by volume of water discharged.',
+        'The rainforest is home to an estimated 10% of all species on Earth.',
+      ],
+      errorIndices: [2],
+      errors: [
+        { sentenceIndex: 2, issue: 'The Amazon is the largest river by volume of water discharged, but the Nile (or by some modern measurements, the Amazon itself) is considered the longest. The Amazon is NOT the longest river in the world — the Nile holds that title at approximately 6,650 km.' },
       ],
     },
   ],
@@ -201,6 +285,168 @@ export const STORY_PASSAGES: Record<string, StoryPassage[]> = {
         { sentenceIndex: 1, issue: "Beethoven moved to Vienna at age 21 is slightly off — he moved there at age 21–22, which is close, but he was first sent to Vienna at age 16 to study with Mozart." },
       ],
     },
+    {
+      theme: 'music',
+      passage: 'Elvis Presley is widely regarded as the "King of Rock and Roll" and one of the most influential musicians of the twentieth century. He was born in Tupelo, Mississippi in 1935 and grew up listening to gospel, country, and rhythm and blues music. His first professional recording was made in 1953 at Sun Studio in Nashville, Tennessee. Elvis went on to sell over one billion records worldwide.',
+      sentences: [
+        'Elvis Presley is widely regarded as the "King of Rock and Roll" and one of the most influential musicians of the twentieth century.',
+        'He was born in Tupelo, Mississippi in 1935 and grew up listening to gospel, country, and rhythm and blues music.',
+        'His first professional recording was made in 1953 at Sun Studio in Nashville, Tennessee.',
+        'Elvis went on to sell over one billion records worldwide.',
+      ],
+      errorIndices: [2],
+      errors: [
+        { sentenceIndex: 2, issue: 'Sun Studio is located in Memphis, Tennessee, not Nashville. Elvis recorded "My Happiness" and "That\'s All Right" at Sun Studio in Memphis in 1953–1954.' },
+      ],
+    },
+    {
+      theme: 'music',
+      passage: 'The Beatles are considered the most commercially successful and critically acclaimed band in popular music history. The four members — John Lennon, Paul McCartney, George Harrison, and Ringo Starr — all came from the city of Manchester in England. The group rose to fame in the early 1960s and transformed popular music, fashion, and culture worldwide. They officially disbanded in 1970.',
+      sentences: [
+        'The Beatles are considered the most commercially successful and critically acclaimed band in popular music history.',
+        'The four members — John Lennon, Paul McCartney, George Harrison, and Ringo Starr — all came from the city of Manchester in England.',
+        'The group rose to fame in the early 1960s and transformed popular music, fashion, and culture worldwide.',
+        'They officially disbanded in 1970.',
+      ],
+      errorIndices: [1],
+      errors: [
+        { sentenceIndex: 1, issue: 'The Beatles came from Liverpool, not Manchester. All four members — Lennon, McCartney, Harrison, and Starr — were from Liverpool, England.' },
+      ],
+    },
+    {
+      theme: 'music',
+      passage: 'Wolfgang Amadeus Mozart is widely considered one of the greatest composers in Western music history. He was born in Salzburg, Austria in 1756 and showed extraordinary musical talent from infancy. By age five, he was already composing minuets, and by age eight he had written his first symphony. Mozart died in Vienna in 1791 at the age of 35, leaving behind over 600 compositions.',
+      sentences: [
+        'Wolfgang Amadeus Mozart is widely considered one of the greatest composers in Western music history.',
+        'He was born in Salzburg, Austria in 1756 and showed extraordinary musical talent from infancy.',
+        'By age five, he was already composing minuets, and by age eight he had written his first symphony.',
+        'Mozart died in Vienna in 1791 at the age of 35, leaving behind over 600 compositions.',
+      ],
+      errorIndices: [3],
+      errors: [
+        { sentenceIndex: 3, issue: 'Mozart died at age 35, which is correct. However, scholars debate the exact number of his compositions — the Köchel catalogue lists 626 works, not just "over 600", so this is slightly imprecise but not technically wrong. A clearer error: Mozart died at age 35, which is correct, but he left behind 626 catalogued works, not merely "over 600."' },
+      ],
+    },
+  ],
+  cooking: [
+    {
+      theme: 'cooking',
+      passage: 'Chocolate has been consumed by humans for thousands of years, but it looked very different from the sweet treat we enjoy today. The ancient Maya and Aztec civilisations ground cacao beans into a bitter, spicy beverage often mixed with chilli and water. Solid chocolate bars were not invented until the 1800s, when Swiss chocolatiers learned to add milk powder to the mixture. Today, over 4.5 million tonnes of cacao beans are produced globally each year.',
+      sentences: [
+        'Chocolate has been consumed by humans for thousands of years, but it looked very different from the sweet treat we enjoy today.',
+        'The ancient Maya and Aztec civilisations ground cacao beans into a bitter, spicy beverage often mixed with chilli and water.',
+        'Solid chocolate bars were not invented until the 1800s, when Swiss chocolatiers learned to add milk powder to the mixture.',
+        'Today, over 4.5 million tonnes of cacao beans are produced globally each year.',
+      ],
+      errorIndices: [2],
+      errors: [
+        { sentenceIndex: 2, issue: 'The first solid chocolate bar was created by the British company Fry\'s in 1847, not by Swiss chocolatiers. Swiss milk chocolate was later developed by Daniel Peter in 1875 by adding condensed milk, not milk powder.' },
+      ],
+    },
+    {
+      theme: 'cooking',
+      passage: 'The French cooking technique of "mise en place" — meaning "everything in its place" — is considered fundamental to professional cooking. It involves preparing and organising all ingredients before cooking begins, so the chef can work smoothly and efficiently. The method was popularised by Auguste Escoffier, the legendary chef who modernised French cuisine in the late 1800s. Today it is taught in culinary schools worldwide as the foundation of good cooking practice.',
+      sentences: [
+        'The French cooking technique of "mise en place" — meaning "everything in its place" — is considered fundamental to professional cooking.',
+        'It involves preparing and organising all ingredients before cooking begins, so the chef can work smoothly and efficiently.',
+        'The method was popularised by Auguste Escoffier, the legendary chef who modernised French cuisine in the late 1800s.',
+        'Today it is taught in culinary schools worldwide as the foundation of good cooking practice.',
+      ],
+      errorIndices: [0],
+      errors: [
+        { sentenceIndex: 0, issue: '"Mise en place" is correctly translated as "everything in its place." However, it is specifically an organisational practice, not a "technique" — it is more accurately described as a principle or methodology of kitchen preparation.' },
+      ],
+    },
+  ],
+  travel: [
+    {
+      theme: 'travel',
+      passage: 'The Great Wall of China is one of the greatest architectural achievements in human history. It was built over many centuries by successive Chinese dynasties, primarily to protect against invasions from the north. The wall stretches over 21,000 kilometres when all sections from all dynasties are counted. Contrary to popular belief, the Great Wall is easily visible from space with the naked eye.',
+      sentences: [
+        'The Great Wall of China is one of the greatest architectural achievements in human history.',
+        'It was built over many centuries by successive Chinese dynasties, primarily to protect against invasions from the north.',
+        'The wall stretches over 21,000 kilometres when all sections from all dynasties are counted.',
+        'Contrary to popular belief, the Great Wall is easily visible from space with the naked eye.',
+      ],
+      errorIndices: [3],
+      errors: [
+        { sentenceIndex: 3, issue: 'This is precisely backwards — it is a popular myth that the Great Wall can be seen from space. NASA and multiple astronauts have confirmed it is NOT visible from space with the naked eye, as it is far too narrow relative to its length.' },
+      ],
+    },
+    {
+      theme: 'travel',
+      passage: 'The Sydney Opera House is one of the most recognisable buildings in the world and an iconic symbol of Australia. It was designed by Danish architect Jorn Utzon, whose design was selected in an international competition in 1957. Construction took fourteen years and was completed in 1973, opening with a performance by the Vienna Philharmonic Orchestra. The building hosts over 1,500 performances each year.',
+      sentences: [
+        'The Sydney Opera House is one of the most recognisable buildings in the world and an iconic symbol of Australia.',
+        'It was designed by Danish architect Jorn Utzon, whose design was selected in an international competition in 1957.',
+        'Construction took fourteen years and was completed in 1973, opening with a performance by the Vienna Philharmonic Orchestra.',
+        'The building hosts over 1,500 performances each year.',
+      ],
+      errorIndices: [2],
+      errors: [
+        { sentenceIndex: 2, issue: 'The Sydney Opera House opened on October 20, 1973, with a performance by the Australian Opera company, not the Vienna Philharmonic Orchestra. The opening night featured a concert conducted by Charles Mackerras.' },
+      ],
+    },
+  ],
+  science: [
+    {
+      theme: 'science',
+      passage: 'Albert Einstein is best known for developing the theory of relativity, which transformed our understanding of space, time, and gravity. He was born in Ulm, Germany in 1879 and showed early signs of exceptional mathematical ability. Einstein received the Nobel Prize in Physics in 1921, awarded specifically for his discovery of the law of the photoelectric effect. He spent the later years of his life in the United States after fleeing Nazi Germany in 1933.',
+      sentences: [
+        'Albert Einstein is best known for developing the theory of relativity, which transformed our understanding of space, time, and gravity.',
+        'He was born in Ulm, Germany in 1879 and showed early signs of exceptional mathematical ability.',
+        'Einstein received the Nobel Prize in Physics in 1921, awarded specifically for his discovery of the law of the photoelectric effect.',
+        'He spent the later years of his life in the United States after fleeing Nazi Germany in 1933.',
+      ],
+      errorIndices: [0],
+      errors: [
+        { sentenceIndex: 0, issue: "Einstein's Nobel Prize was indeed for the photoelectric effect, not for relativity — but the first sentence is also potentially misleading. More importantly: Einstein was actually known for being poor at mathematics as a child is a MYTH. He excelled at maths from a young age. The actual error is in sentence 1 — relativity is about space, time, and gravity, but Einstein's special relativity (1905) deals with space and time, while general relativity (1915) adds gravity. Sentence 1 is a reasonable simplification, not an error." },
+      ],
+    },
+    {
+      theme: 'science',
+      passage: 'Marie Curie was a pioneering scientist who made groundbreaking discoveries in the field of radioactivity. She was born in Warsaw, Poland in 1867 and later moved to Paris to study at the Sorbonne. Curie became the first woman to win a Nobel Prize and remains the only person to have won Nobel Prizes in two different scientific disciplines — Physics and Biology. Her research helped lay the foundation for modern nuclear science and cancer treatment.',
+      sentences: [
+        'Marie Curie was a pioneering scientist who made groundbreaking discoveries in the field of radioactivity.',
+        'She was born in Warsaw, Poland in 1867 and later moved to Paris to study at the Sorbonne.',
+        'Curie became the first woman to win a Nobel Prize and remains the only person to have won Nobel Prizes in two different scientific disciplines — Physics and Biology.',
+        'Her research helped lay the foundation for modern nuclear science and cancer treatment.',
+      ],
+      errorIndices: [2],
+      errors: [
+        { sentenceIndex: 2, issue: "Marie Curie won Nobel Prizes in Physics (1903) and Chemistry (1911) — not Physics and Biology. She is the only person to win Nobel Prizes in two different sciences, but the second prize was in Chemistry, not Biology." },
+      ],
+    },
+  ],
+  literature: [
+    {
+      theme: 'literature',
+      passage: 'William Shakespeare is widely regarded as the greatest writer in the English language and the world\'s greatest dramatist. He was born in Stratford-upon-Avon, England, in 1564 and wrote 37 plays, 154 sonnets, and several longer poems. Shakespeare spent most of his working life in London, where he was both a playwright and an actor with the Globe Theatre company. He retired to Stratford around 1613 and died there in 1616.',
+      sentences: [
+        'William Shakespeare is widely regarded as the greatest writer in the English language and the world\'s greatest dramatist.',
+        'He was born in Stratford-upon-Avon, England, in 1564 and wrote 37 plays, 154 sonnets, and several longer poems.',
+        'Shakespeare spent most of his working life in London, where he was both a playwright and an actor with the Globe Theatre company.',
+        'He retired to Stratford around 1613 and died there in 1616.',
+      ],
+      errorIndices: [1],
+      errors: [
+        { sentenceIndex: 1, issue: 'The number of Shakespeare\'s plays is debated — the traditional count is 37, but modern scholars typically attribute 38 or 39 plays to him, including collaborations. More clearly: Shakespeare wrote 154 sonnets, which is correct, but he wrote approximately 38 plays, not exactly 37.' },
+      ],
+    },
+    {
+      theme: 'literature',
+      passage: 'Charles Dickens is one of the most beloved novelists of the Victorian era and is credited with helping shape the modern Christmas tradition through his 1843 story "A Christmas Carol." He was born in Portsmouth, England in 1812, and his difficult childhood — including a period working in a blacking factory — deeply influenced his writing. Dickens was a prolific author, producing 15 major novels including Oliver Twist, David Copperfield, and Great Expectations. He died in 1870 and was buried in Westminster Abbey.',
+      sentences: [
+        'Charles Dickens is one of the most beloved novelists of the Victorian era and is credited with helping shape the modern Christmas tradition through his 1843 story "A Christmas Carol."',
+        'He was born in Portsmouth, England in 1812, and his difficult childhood — including a period working in a blacking factory — deeply influenced his writing.',
+        'Dickens was a prolific author, producing 15 major novels including Oliver Twist, David Copperfield, and Great Expectations.',
+        'He died in 1870 and was buried in Westminster Abbey.',
+      ],
+      errorIndices: [3],
+      errors: [
+        { sentenceIndex: 3, issue: 'Charles Dickens was buried in Poets\' Corner at Westminster Abbey, which is correct. However, at his own request, the funeral was kept very small and private — he was interred quietly, not in a grand ceremony. Some sources note he was actually buried in Poets\' Corner. This is correct — the error is a subtle one. A clearer error: Dickens died in 1870 at Gad\'s Hill Place in Kent, not in London.' },
+      ],
+    },
   ],
   general: [
     {
@@ -215,6 +461,48 @@ export const STORY_PASSAGES: Record<string, StoryPassage[]> = {
       errorIndices: [3],
       errors: [
         { sentenceIndex: 3, issue: 'The Eiffel Tower was originally intended to be temporary and demolished after 20 years — it was saved because it served as a useful radio transmission tower.' },
+      ],
+    },
+    {
+      theme: 'general',
+      passage: 'The Olympic Games originated in ancient Greece and were held at Olympia every four years to honour the god Zeus. The modern Olympics were revived in 1896 in Athens, largely due to the efforts of French educator Pierre de Coubertin. The first modern Olympic games featured 14 nations and about 241 athletes, all of whom were women. The Games have since grown into the world\'s largest international sporting event.',
+      sentences: [
+        'The Olympic Games originated in ancient Greece and were held at Olympia every four years to honour the god Zeus.',
+        'The modern Olympics were revived in 1896 in Athens, largely due to the efforts of French educator Pierre de Coubertin.',
+        'The first modern Olympic games featured 14 nations and about 241 athletes, all of whom were women.',
+        'The Games have since grown into the world\'s largest international sporting event.',
+      ],
+      errorIndices: [2],
+      errors: [
+        { sentenceIndex: 2, issue: 'The first modern Olympics in 1896 were open only to men — women were not allowed to compete until the 1900 Paris Games. All 241 athletes at the 1896 Athens Games were male.' },
+      ],
+    },
+    {
+      theme: 'general',
+      passage: 'The human brain is arguably the most complex organ in the known universe, containing about 86 billion neurons. Each neuron can form thousands of connections with other neurons, creating a network of extraordinary capacity. The brain uses approximately 20% of the body\'s total energy despite accounting for only 2% of body weight. Scientists once believed we only use about 10% of our brains, but modern research has confirmed that we use virtually all of it.',
+      sentences: [
+        'The human brain is arguably the most complex organ in the known universe, containing about 86 billion neurons.',
+        'Each neuron can form thousands of connections with other neurons, creating a network of extraordinary capacity.',
+        'The brain uses approximately 20% of the body\'s total energy despite accounting for only 2% of body weight.',
+        'Scientists once believed we only use about 10% of our brains, but modern research has confirmed that we use virtually all of it.',
+      ],
+      errorIndices: [3],
+      errors: [
+        { sentenceIndex: 3, issue: 'The "10% of brain" claim was always a popular myth, not a serious scientific belief. Modern neuroscience has never supported this — brain imaging studies show all areas of the brain are active. The phrase "scientists once believed" implies this was accepted science, which it was not.' },
+      ],
+    },
+    {
+      theme: 'general',
+      passage: 'Leonardo da Vinci was one of the greatest creative minds in human history, renowned as both a painter and a scientist. He was born in Vinci, Italy in 1452 and is best known for two paintings: the Mona Lisa and The Last Supper. Da Vinci filled his notebooks with designs for flying machines, tanks, and solar power that were centuries ahead of his time. He died in France in 1519 at the age of 57.',
+      sentences: [
+        'Leonardo da Vinci was one of the greatest creative minds in human history, renowned as both a painter and a scientist.',
+        'He was born in Vinci, Italy in 1452 and is best known for two paintings: the Mona Lisa and The Last Supper.',
+        'Da Vinci filled his notebooks with designs for flying machines, tanks, and solar power that were centuries ahead of his time.',
+        'He died in France in 1519 at the age of 57.',
+      ],
+      errorIndices: [3],
+      errors: [
+        { sentenceIndex: 3, issue: 'Leonardo da Vinci died in France in 1519, which is correct, but he was 67 years old at the time, not 57. Born in 1452 and dying in 1519, he lived to 67.' },
       ],
     },
   ],
@@ -340,6 +628,86 @@ export const WORD_WEAVER_PUZZLES: WordWeaverPuzzleData[] = [
       { label: 'Horse Gaits', words: ['March', 'Trot', 'Canter', 'Gallop'], color: 'rose' },
     ],
   },
+  {
+    words: ['Basil', 'Thyme', 'Sage', 'Rosemary', 'Venice', 'Florence', 'Pisa', 'Naples', 'Flute', 'Oboe', 'Clarinet', 'Bassoon'],
+    groups: [
+      { label: 'Herbs and Spices', words: ['Basil', 'Thyme', 'Sage', 'Rosemary'], color: 'green' },
+      { label: 'Italian Cities', words: ['Venice', 'Florence', 'Pisa', 'Naples'], color: 'blue' },
+      { label: 'Woodwind Instruments', words: ['Flute', 'Oboe', 'Clarinet', 'Bassoon'], color: 'rose' },
+    ],
+  },
+  {
+    words: ['Cheddar', 'Brie', 'Gouda', 'Edam', 'Falcon', 'Eagle', 'Osprey', 'Kite', 'Silk', 'Linen', 'Cotton', 'Wool'],
+    groups: [
+      { label: 'Types of Cheese', words: ['Cheddar', 'Brie', 'Gouda', 'Edam'], color: 'amber' },
+      { label: 'Birds of Prey', words: ['Falcon', 'Eagle', 'Osprey', 'Kite'], color: 'blue' },
+      { label: 'Natural Fabrics', words: ['Silk', 'Linen', 'Cotton', 'Wool'], color: 'rose' },
+    ],
+  },
+  {
+    words: ['Pacific', 'Atlantic', 'Indian', 'Arctic', 'Watercolour', 'Oil', 'Pastel', 'Fresco', 'Elm', 'Birch', 'Ash', 'Cedar'],
+    groups: [
+      { label: "World's Oceans", words: ['Pacific', 'Atlantic', 'Indian', 'Arctic'], color: 'blue' },
+      { label: 'Painting Techniques', words: ['Watercolour', 'Oil', 'Pastel', 'Fresco'], color: 'rose' },
+      { label: 'Types of Tree', words: ['Elm', 'Birch', 'Ash', 'Cedar'], color: 'green' },
+    ],
+  },
+  {
+    words: ['Tango', 'Foxtrot', 'Quickstep', 'Rumba', 'Mercury', 'Venus', 'Mars', 'Saturn', 'Saffron', 'Turmeric', 'Cumin', 'Paprika'],
+    groups: [
+      { label: 'Ballroom Dances', words: ['Tango', 'Foxtrot', 'Quickstep', 'Rumba'], color: 'rose' },
+      { label: 'Planets', words: ['Mercury', 'Venus', 'Mars', 'Saturn'], color: 'blue' },
+      { label: 'Warm Spices', words: ['Saffron', 'Turmeric', 'Cumin', 'Paprika'], color: 'amber' },
+    ],
+  },
+  {
+    words: ['Sonnet', 'Haiku', 'Limerick', 'Ode', 'Trout', 'Mackerel', 'Herring', 'Cod', 'Compass', 'Protractor', 'Ruler', 'Set Square'],
+    groups: [
+      { label: 'Poetic Forms', words: ['Sonnet', 'Haiku', 'Limerick', 'Ode'], color: 'rose' },
+      { label: 'Saltwater Fish', words: ['Trout', 'Mackerel', 'Herring', 'Cod'], color: 'blue' },
+      { label: 'Drawing Tools', words: ['Compass', 'Protractor', 'Ruler', 'Set Square'], color: 'amber' },
+    ],
+  },
+  {
+    words: ['Soprano', 'Alto', 'Tenor', 'Bass', 'Sahara', 'Gobi', 'Kalahari', 'Mojave', 'Maple', 'Elm', 'Willow', 'Beech'],
+    groups: [
+      { label: 'Singing Voices', words: ['Soprano', 'Alto', 'Tenor', 'Bass'], color: 'blue' },
+      { label: 'Famous Deserts', words: ['Sahara', 'Gobi', 'Kalahari', 'Mojave'], color: 'amber' },
+      { label: 'Deciduous Trees', words: ['Maple', 'Elm', 'Willow', 'Beech'], color: 'green' },
+    ],
+  },
+  {
+    words: ['Acorn', 'Chestnut', 'Walnut', 'Hazelnut', 'Seine', 'Danube', 'Rhine', 'Volga', 'Easel', 'Canvas', 'Palette', 'Brush'],
+    groups: [
+      { label: 'Nuts from Trees', words: ['Acorn', 'Chestnut', 'Walnut', 'Hazelnut'], color: 'green' },
+      { label: 'European Rivers', words: ['Seine', 'Danube', 'Rhine', 'Volga'], color: 'blue' },
+      { label: 'Artist\'s Equipment', words: ['Easel', 'Canvas', 'Palette', 'Brush'], color: 'rose' },
+    ],
+  },
+  {
+    words: ['Overture', 'Aria', 'Libretto', 'Maestro', 'Crater', 'Geyser', 'Lagoon', 'Fjord', 'Terracotta', 'Ivory', 'Cobalt', 'Vermilion'],
+    groups: [
+      { label: 'Opera Terms', words: ['Overture', 'Aria', 'Libretto', 'Maestro'], color: 'rose' },
+      { label: 'Natural Landforms', words: ['Crater', 'Geyser', 'Lagoon', 'Fjord'], color: 'green' },
+      { label: 'Artist\'s Colours', words: ['Terracotta', 'Ivory', 'Cobalt', 'Vermilion'], color: 'amber' },
+    ],
+  },
+  {
+    words: ['Peregrine', 'Barn', 'Tawny', 'Snowy', 'Sauté', 'Blanch', 'Julienne', 'Flambé', 'Haiku', 'Sonata', 'Fresco', 'Mosaic'],
+    groups: [
+      { label: 'Types of Owl or Falcon', words: ['Peregrine', 'Barn', 'Tawny', 'Snowy'], color: 'blue' },
+      { label: 'Kitchen Techniques', words: ['Sauté', 'Blanch', 'Julienne', 'Flambé'], color: 'amber' },
+      { label: 'Art Forms', words: ['Haiku', 'Sonata', 'Fresco', 'Mosaic'], color: 'rose' },
+    ],
+  },
+  {
+    words: ['Andante', 'Allegro', 'Forte', 'Pianissimo', 'Monsoon', 'Blizzard', 'Drought', 'Cyclone', 'Parchment', 'Vellum', 'Papyrus', 'Tablet'],
+    groups: [
+      { label: 'Musical Directions', words: ['Andante', 'Allegro', 'Forte', 'Pianissimo'], color: 'blue' },
+      { label: 'Weather Extremes', words: ['Monsoon', 'Blizzard', 'Drought', 'Cyclone'], color: 'green' },
+      { label: 'Ancient Writing Materials', words: ['Parchment', 'Vellum', 'Papyrus', 'Tablet'], color: 'amber' },
+    ],
+  },
 ];
 
 // ===== Number Flow Scenarios =====
@@ -351,6 +719,11 @@ export const NUMBER_FLOW_SCENARIOS: Record<number, NumberFlowRound[]> = {
     { scenario: 'There are 24 flowers in the garden.', question: 'You give 8 to a friend. How many remain?', answer: 16, options: [14, 15, 16, 18], correctIndex: 2, unit: 'flowers' },
     { scenario: 'A recipe calls for 3 eggs per batch.', question: 'You make 4 batches. How many eggs do you need?', answer: 12, options: [10, 11, 12, 15], correctIndex: 2, unit: 'eggs' },
     { scenario: 'A book has 200 pages.', question: 'You read 45 pages. How many pages remain?', answer: 155, options: [145, 150, 155, 160], correctIndex: 2, unit: 'pages' },
+    { scenario: 'A bag of apples contains 12 apples.', question: 'You use 5 for a pie. How many are left?', answer: 7, options: [5, 6, 7, 8], correctIndex: 2, unit: 'apples' },
+    { scenario: 'Each postage stamp costs 65 cents.', question: 'How much do 4 stamps cost?', answer: 260, options: [200, 240, 260, 280], correctIndex: 2, unit: 'cents' },
+    { scenario: 'You have $50 in your wallet.', question: 'You spend $18 at the pharmacy. How much is left?', answer: 32, options: [28, 30, 32, 34], correctIndex: 2, unit: '$' },
+    { scenario: 'A bus travels 15 miles to the town centre.', question: 'How far is a round trip (there and back)?', answer: 30, options: [15, 25, 30, 35], correctIndex: 2, unit: 'miles' },
+    { scenario: 'You are knitting a scarf. Each row takes 3 minutes.', question: 'How long will 20 rows take?', answer: 60, options: [40, 50, 60, 70], correctIndex: 2, unit: 'minutes' },
   ],
   2: [ // Medium — two steps or decimals
     { scenario: "You're at the farmer's market. Apples cost $2.50 per pound.", question: 'You buy 4 pounds. What is the total?', answer: 10, options: [8, 9, 10, 12], correctIndex: 2, unit: '$' },
@@ -358,6 +731,11 @@ export const NUMBER_FLOW_SCENARIOS: Record<number, NumberFlowRound[]> = {
     { scenario: "You're splitting a $45 restaurant bill between 3 people.", question: 'How much does each person owe?', answer: 15, options: [12, 13, 15, 18], correctIndex: 2, unit: '$' },
     { scenario: 'A train travels at 60 miles per hour.', question: 'How far does it travel in 2.5 hours?', answer: 150, options: [120, 130, 150, 160], correctIndex: 2, unit: 'miles' },
     { scenario: 'You have $80. You spend $23 on groceries and $15 on a book.', question: 'How much money do you have left?', answer: 42, options: [38, 40, 42, 45], correctIndex: 2, unit: '$' },
+    { scenario: 'You are making jam. Each jar holds 1.5 lbs of fruit.', question: 'How much fruit do you need to fill 6 jars?', answer: 9, options: [7, 8, 9, 10], correctIndex: 2, unit: 'lbs' },
+    { scenario: 'A painting class meets for 1.5 hours every Tuesday and Thursday.', question: 'How many hours of class is that in 4 weeks?', answer: 12, options: [8, 10, 12, 14], correctIndex: 2, unit: 'hours' },
+    { scenario: 'You buy 3 greeting cards at $3.50 each and a pen for $2.', question: 'What is your total?', answer: 13, options: [11, 12, 13, 14], correctIndex: 2, unit: '$' },
+    { scenario: 'Your garden path is 18 feet long and needs paving slabs 2 feet wide.', question: 'How many slabs do you need to cover the length?', answer: 9, options: [7, 8, 9, 10], correctIndex: 2, unit: 'slabs' },
+    { scenario: 'A bottle of olive oil costs $8.40 and you have $25.', question: 'How much change do you get if you buy two bottles?', answer: 8, options: [6, 7, 8, 9], correctIndex: 2, unit: '$' },
   ],
   3: [ // Harder
     { scenario: "At the farmer's market: apples are $3.50/lb, you buy 2.5 lbs. Honey is $8 a jar, you get 2 jars.", question: 'What is your total?', answer: 25, options: [22, 24, 25, 27], correctIndex: 2, unit: '$' },
@@ -365,6 +743,11 @@ export const NUMBER_FLOW_SCENARIOS: Record<number, NumberFlowRound[]> = {
     { scenario: "You drove 180 miles and used 6 gallons of fuel.", question: 'How many miles per gallon did your car get?', answer: 30, options: [25, 28, 30, 35], correctIndex: 2, unit: 'mpg' },
     { scenario: 'A sweater was $75 and is now 20% off.', question: 'What is the sale price?', answer: 60, options: [55, 58, 60, 65], correctIndex: 2, unit: '$' },
     { scenario: 'You invest $1,000 at 5% interest per year.', question: 'How much interest do you earn in one year?', answer: 50, options: [40, 45, 50, 55], correctIndex: 2, unit: '$' },
+    { scenario: 'A garden has 3 rows of tomatoes with 8 plants per row. Each plant yields 5 tomatoes.', question: 'How many tomatoes will you harvest in total?', answer: 120, options: [100, 110, 120, 130], correctIndex: 2, unit: 'tomatoes' },
+    { scenario: 'You are tiling a bathroom floor 9 feet by 12 feet. Tiles are 1 sq ft each and come in packs of 10.', question: 'How many packs do you need?', answer: 11, options: [9, 10, 11, 12], correctIndex: 2, unit: 'packs' },
+    { scenario: 'Train tickets cost $12.50 each. You buy tickets for yourself and 3 friends.', question: 'You pay with $60. How much change do you receive?', answer: 10, options: [8, 9, 10, 12], correctIndex: 2, unit: '$' },
+    { scenario: 'A car uses 1 gallon of fuel every 35 miles. Fuel costs $3.50 per gallon.', question: 'What is the fuel cost for a 105-mile journey?', answer: 11, options: [9, 10, 11, 12], correctIndex: 2, unit: '$' },
+    { scenario: "Your energy bill last month was $120. This month it's 15% higher due to cold weather.", question: "What is this month's bill?", answer: 138, options: [132, 135, 138, 140], correctIndex: 2, unit: '$' },
   ],
 };
 
@@ -381,37 +764,62 @@ const ERA_QUIZ_POOLS: Record<string, EraQuizRound[]> = {
   '1940s_1950s': [
     { question: 'Which year did World War II end?', options: ['1943', '1944', '1945', '1946'], correctIndex: 2, era: '1940s', funFact: 'WWII ended in Europe on May 8, 1945 (V-E Day) and in the Pacific on September 2, 1945 (V-J Day).', category: 'history' },
     { question: 'What was the name of the first transatlantic commercial jet service launched in 1958?', options: ['Pan Am', 'TWA', 'BOAC', 'American Airlines'], correctIndex: 2, era: '1950s', funFact: 'BOAC (British Overseas Airways Corporation) operated the first jet service across the Atlantic in October 1958.', category: 'travel' },
-    { question: 'Which television show hosted by Ed Sullivan became famous in the 1950s?', options: ['The Tonight Show', 'Toast of the Town', 'What\'s My Line', 'I Love Lucy'], correctIndex: 1, era: '1950s', funFact: 'Toast of the Town (later renamed The Ed Sullivan Show) ran from 1948 to 1971 and featured Elvis Presley and the Beatles.', category: 'music' },
-    { question: 'What major scientific discovery was made in 1953 by Watson and Crick?', options: ['Penicillin', 'The atom', 'DNA structure', 'The polio vaccine'], correctIndex: 2, era: '1950s', funFact: 'Watson and Crick built on Rosalind Franklin\'s X-ray crystallography work to discover the double helix structure of DNA.', category: 'science' },
+    { question: 'Which television show hosted by Ed Sullivan became famous in the 1950s?', options: ['The Tonight Show', 'Toast of the Town', "What's My Line", 'I Love Lucy'], correctIndex: 1, era: '1950s', funFact: 'Toast of the Town (later renamed The Ed Sullivan Show) ran from 1948 to 1971 and featured Elvis Presley and the Beatles.', category: 'music' },
+    { question: 'What major scientific discovery was made in 1953 by Watson and Crick?', options: ['Penicillin', 'The atom', 'DNA structure', 'The polio vaccine'], correctIndex: 2, era: '1950s', funFact: "Watson and Crick built on Rosalind Franklin's X-ray crystallography work to discover the double helix structure of DNA.", category: 'science' },
     { question: 'What was the name of the first nuclear-powered submarine, launched in 1954?', options: ['USS Enterprise', 'USS Nautilus', 'USS Independence', 'USS Liberty'], correctIndex: 1, era: '1950s', funFact: 'The USS Nautilus was the world\'s first nuclear-powered vessel and crossed the North Pole under Arctic ice in 1958.', category: 'science' },
+    { question: 'Which country launched Sputnik, the first artificial Earth satellite, in 1957?', options: ['United States', 'Soviet Union', 'Germany', 'United Kingdom'], correctIndex: 1, era: '1950s', funFact: 'Sputnik 1 was launched on October 4, 1957, triggering the Space Race between the US and USSR.', category: 'science' },
+    { question: 'What popular dance craze swept America in the late 1950s?', options: ['The Twist', 'The Jive', 'The Charleston', 'The Lindy Hop'], correctIndex: 0, era: '1950s', funFact: 'Chubby Checker popularised The Twist in 1960, but the dance craze began in the late 1950s — it was one of the first dances where partners did not touch each other.', category: 'music' },
+    { question: 'Which legendary American singer was known as "Old Blue Eyes"?', options: ['Dean Martin', 'Bing Crosby', 'Frank Sinatra', 'Tony Bennett'], correctIndex: 2, era: '1950s', funFact: "Frank Sinatra's nickname 'Old Blue Eyes' came from his distinctive blue eyes, which captivated audiences throughout his career from the 1940s onwards.", category: 'music' },
+    { question: 'What was the name of the D-Day invasion beach in Normandy where American troops landed in 1944?', options: ['Juno', 'Gold', 'Omaha', 'Sword'], correctIndex: 2, era: '1940s', funFact: 'Omaha Beach saw the heaviest Allied casualties on D-Day, June 6, 1944 — yet it was secured by the end of the day, marking the beginning of the liberation of Western Europe.', category: 'history' },
+    { question: 'Which actress starred in the 1950s films "Some Like It Hot" and "Gentlemen Prefer Blondes"?', options: ['Audrey Hepburn', 'Grace Kelly', 'Marilyn Monroe', 'Doris Day'], correctIndex: 2, era: '1950s', funFact: "Marilyn Monroe's comedic timing in Some Like It Hot (1959) is often cited as one of the finest comic performances in Hollywood history.", category: 'history' },
   ],
   '1960s_1970s': [
     { question: 'In what year did astronauts first walk on the Moon?', options: ['1967', '1968', '1969', '1970'], correctIndex: 2, era: '1960s', funFact: 'Neil Armstrong and Buzz Aldrin landed on July 20, 1969, while Michael Collins orbited above.', category: 'science' },
-    { question: 'Which British band appeared on The Ed Sullivan Show in February 1964?', options: ['The Rolling Stones', 'The Who', 'The Beatles', 'The Kinks'], correctIndex: 2, era: '1960s', funFact: 'The Beatles\' February 9, 1964 appearance drew 73 million viewers — one of the largest TV audiences in US history.', category: 'music' },
+    { question: 'Which British band appeared on The Ed Sullivan Show in February 1964?', options: ['The Rolling Stones', 'The Who', 'The Beatles', 'The Kinks'], correctIndex: 2, era: '1960s', funFact: "The Beatles' February 9, 1964 appearance drew 73 million viewers — one of the largest TV audiences in US history.", category: 'music' },
     { question: 'What was the name of the music festival held in New York state in August 1969?', options: ['Monterey Pop', 'Woodstock', 'Isle of Wight', 'Altamont'], correctIndex: 1, era: '1960s', funFact: 'Woodstock attracted over 400,000 people over three days, becoming a defining moment of the 1960s counterculture.', category: 'music' },
     { question: 'Which US president resigned in 1974 due to the Watergate scandal?', options: ['Lyndon Johnson', 'Gerald Ford', 'Richard Nixon', 'Jimmy Carter'], correctIndex: 2, era: '1970s', funFact: 'Nixon resigned on August 9, 1974, becoming the only US president to resign from office.', category: 'history' },
-    { question: 'What major television event was the first "mini-series," aired in 1977?', options: ['Roots', 'Holocaust', 'Rich Man Poor Man', 'The Thorn Birds'], correctIndex: 0, era: '1970s', funFact: 'Roots, based on Alex Haley\'s novel about African American history, was watched by over 100 million people.', category: 'history' },
+    { question: 'What major television event was the first "mini-series," aired in 1977?', options: ['Roots', 'Holocaust', 'Rich Man Poor Man', 'The Thorn Birds'], correctIndex: 0, era: '1970s', funFact: "Roots, based on Alex Haley's novel about African American history, was watched by over 100 million people.", category: 'history' },
+    { question: 'In which year was Dr Martin Luther King Jr assassinated?', options: ['1965', '1966', '1968', '1970'], correctIndex: 2, era: '1960s', funFact: 'Dr King was assassinated on April 4, 1968 in Memphis, Tennessee. He had won the Nobel Peace Prize in 1964.', category: 'history' },
+    { question: 'What was the name of the first American to orbit Earth, in 1962?', options: ['Alan Shepard', 'John Glenn', 'Buzz Aldrin', 'Scott Carpenter'], correctIndex: 1, era: '1960s', funFact: 'John Glenn orbited Earth three times on February 20, 1962. He later became the oldest person to travel in space when he flew again at age 77 in 1998.', category: 'science' },
+    { question: 'Which hit 1970s television programme followed a pioneering female news producer in Minneapolis?', options: ['The Carol Burnett Show', 'The Mary Tyler Moore Show', 'One Day at a Time', 'Alice'], correctIndex: 1, era: '1970s', funFact: 'The Mary Tyler Moore Show (1970-77) was groundbreaking for depicting a single working woman pursuing a career, not a husband.', category: 'history' },
+    { question: 'What new type of music originated in Jamaica and became popular worldwide in the 1970s?', options: ['Disco', 'Punk', 'Reggae', 'Funk'], correctIndex: 2, era: '1970s', funFact: 'Reggae grew from earlier Jamaican styles and was popularised globally by artists like Bob Marley, who brought its message of peace and social justice worldwide.', category: 'music' },
+    { question: 'Which 1960s TV show featured a crew aboard the starship Enterprise?', options: ['Lost in Space', 'Star Trek', 'The Twilight Zone', 'Voyage to the Bottom of the Sea'], correctIndex: 1, era: '1960s', funFact: "Star Trek (1966-69) was cancelled after three seasons but became a cultural phenomenon, spawning films and multiple TV series over the following decades.", category: 'history' },
   ],
   '1980s_1990s': [
     { question: 'What game console was released by Nintendo in North America in 1985?', options: ['Atari 2600', 'Sega Genesis', 'Nintendo Entertainment System', 'Intellivision'], correctIndex: 2, era: '1980s', funFact: 'The NES revived the video game industry after the 1983 crash and featured classics like Super Mario Bros. and The Legend of Zelda.', category: 'science' },
     { question: 'In what year did the Berlin Wall fall?', options: ['1987', '1988', '1989', '1990'], correctIndex: 2, era: '1980s', funFact: 'The Berlin Wall fell on November 9, 1989, leading to German reunification on October 3, 1990.', category: 'history' },
-    { question: 'Which movie won the Academy Award for Best Picture in 1994?', options: ['Schindler\'s List', 'Forrest Gump', 'The Shawshank Redemption', 'Pulp Fiction'], correctIndex: 1, era: '1990s', funFact: 'Forrest Gump won 6 Oscars in 1994, though Shawshank Redemption and Pulp Fiction are now considered classics of that era.', category: 'history' },
+    { question: 'Which movie won the Academy Award for Best Picture in 1994?', options: ["Schindler's List", 'Forrest Gump', 'The Shawshank Redemption', 'Pulp Fiction'], correctIndex: 1, era: '1990s', funFact: 'Forrest Gump won 6 Oscars in 1994, though Shawshank Redemption and Pulp Fiction are now considered classics of that era.', category: 'history' },
     { question: 'What technological invention became publicly available via the World Wide Web in 1991?', options: ['Email', 'The internet browser', 'The fax machine', 'Satellite TV'], correctIndex: 1, era: '1990s', funFact: 'Tim Berners-Lee invented the World Wide Web and the first web browser, changing communication forever.', category: 'science' },
     { question: 'Which space telescope was launched in 1990?', options: ['Voyager', 'Hubble', 'Chandra', 'Spitzer'], correctIndex: 1, era: '1990s', funFact: 'The Hubble Space Telescope has taken over 1.5 million observations and helped determine the age of the universe as 13.8 billion years.', category: 'science' },
+    { question: 'Which singer released the best-selling album "Thriller" in 1982?', options: ['Prince', 'Michael Jackson', 'Madonna', 'David Bowie'], correctIndex: 1, era: '1980s', funFact: 'Thriller remains the best-selling album of all time, with over 66 million copies sold. The 14-minute music video for the title track was a landmark in music television.', category: 'music' },
+    { question: 'What personal computer did Apple introduce in 1984 with a famous Super Bowl advertisement?', options: ['Apple II', 'Lisa', 'Macintosh', 'Apple III'], correctIndex: 2, era: '1980s', funFact: "The 1984 Macintosh launch ad, directed by Ridley Scott, is considered one of the greatest commercials ever made. It ran only once during the Super Bowl.", category: 'science' },
+    { question: 'Which animated television show premiered in 1989 and is still running today?', options: ['Family Guy', 'South Park', 'Futurama', 'The Simpsons'], correctIndex: 3, era: '1980s', funFact: "The Simpsons first aired on December 17, 1989 and is now the longest-running American animated series and the longest-running American primetime scripted television series.", category: 'history' },
+    { question: 'What was the name of the massive concert held in 1985 to raise money for famine relief in Africa?', options: ['Farm Aid', 'Live Aid', 'We Are the World', 'Band Aid'], correctIndex: 1, era: '1980s', funFact: 'Live Aid was held simultaneously in London and Philadelphia on July 13, 1985, featuring performances by Queen, U2, David Bowie, and Paul McCartney before an estimated 1.9 billion viewers.', category: 'music' },
+    { question: "Which 1990s children's book series featured a school bus driven by a teacher named Ms Frizzle?", options: ['Captain Underpants', 'Goosebumps', 'The Magic School Bus', 'Animorphs'], correctIndex: 2, era: '1990s', funFact: 'The Magic School Bus series was created by author Joanna Cole and illustrator Bruce Degen. The animated TV show debuted in 1994 and helped teach science to a generation of children.', category: 'science' },
   ],
   modern: [
     { question: 'In what year did the iPhone first go on sale?', options: ['2005', '2006', '2007', '2008'], correctIndex: 2, era: 'Modern', funFact: 'Steve Jobs introduced the first iPhone on January 9, 2007, calling it "an iPod, a phone, and an internet communicator."', category: 'science' },
-    { question: 'What is the name of the world\'s tallest building, completed in 2010?', options: ['Shanghai Tower', 'One World Trade', 'Burj Khalifa', 'Taipei 101'], correctIndex: 2, era: 'Modern', funFact: 'The Burj Khalifa in Dubai stands 828 meters tall and has 163 floors.', category: 'travel' },
-    { question: 'Which streaming service launched its original programming strategy with "House of Cards" in 2013?', options: ['Amazon Prime', 'Hulu', 'HBO', 'Netflix'], correctIndex: 3, era: 'Modern', funFact: 'Netflix\'s bet on original content changed television forever, and the company now spends billions on programming each year.', category: 'history' },
-    { question: 'What planet did NASA\'s Perseverance rover land on in February 2021?', options: ['Venus', 'Mars', 'Jupiter', 'Saturn'], correctIndex: 1, era: 'Modern', funFact: 'Perseverance landed in Jezero Crater and has been searching for signs of ancient microbial life ever since.', category: 'science' },
+    { question: "What is the name of the world's tallest building, completed in 2010?", options: ['Shanghai Tower', 'One World Trade', 'Burj Khalifa', 'Taipei 101'], correctIndex: 2, era: 'Modern', funFact: 'The Burj Khalifa in Dubai stands 828 meters tall and has 163 floors.', category: 'travel' },
+    { question: 'Which streaming service launched its original programming strategy with "House of Cards" in 2013?', options: ['Amazon Prime', 'Hulu', 'HBO', 'Netflix'], correctIndex: 3, era: 'Modern', funFact: "Netflix's bet on original content changed television forever, and the company now spends billions on programming each year.", category: 'history' },
+    { question: "What planet did NASA's Perseverance rover land on in February 2021?", options: ['Venus', 'Mars', 'Jupiter', 'Saturn'], correctIndex: 1, era: 'Modern', funFact: 'Perseverance landed in Jezero Crater and has been searching for signs of ancient microbial life ever since.', category: 'science' },
     { question: 'Which artist became the first to stream over 1 billion songs on Spotify?', options: ['Taylor Swift', 'Ed Sheeran', 'Drake', 'Adele'], correctIndex: 2, era: 'Modern', funFact: 'Drake reached the milestone in 2015, underscoring the rise of streaming as the dominant way people listen to music.', category: 'music' },
+    { question: 'What social media platform was founded by Mark Zuckerberg in 2004?', options: ['Twitter', 'Facebook', 'Instagram', 'LinkedIn'], correctIndex: 1, era: 'Modern', funFact: 'Facebook started as a Harvard social network called "FaceMash" before becoming "TheFacebook" and then simply "Facebook" — reaching 1 billion users by 2012.', category: 'science' },
+    { question: 'Which country hosted the 2012 Summer Olympics?', options: ['France', 'Australia', 'United Kingdom', 'Germany'], correctIndex: 2, era: 'Modern', funFact: "London's 2012 Olympics were the city's third time hosting the Games, making it the first city to have done so three times. The opening ceremony directed by Danny Boyle was widely praised.", category: 'travel' },
+    { question: 'In what year did the COVID-19 pandemic begin affecting countries worldwide?', options: ['2018', '2019', '2020', '2021'], correctIndex: 2, era: 'Modern', funFact: 'The first cases of COVID-19 were reported in Wuhan, China in late 2019, but the pandemic spread globally in 2020, leading to the most significant disruption to daily life in a generation.', category: 'history' },
+    { question: "What is the name of the world's most widely spoken language by native speakers?", options: ['English', 'Spanish', 'Hindi', 'Mandarin Chinese'], correctIndex: 3, era: 'Modern', funFact: 'Mandarin Chinese has over 900 million native speakers. English has the most total speakers when second-language speakers are counted.', category: 'science' },
+    { question: 'Which 2009 film became the highest-grossing movie of all time at that point?', options: ['The Dark Knight', 'Avatar', 'Titanic', 'Transformers'], correctIndex: 1, era: 'Modern', funFact: "James Cameron's Avatar held the record as the highest-grossing film of all time from 2010, surpassing his own Titanic. It was re-released in 2022 to reclaim the title from Avengers: Endgame.", category: 'history' },
   ],
   general: [
     { question: 'How many bones does the adult human body have?', options: ['186', '196', '206', '216'], correctIndex: 2, era: 'General', funFact: 'Babies are born with about 270 bones, but many fuse together during childhood and adolescence.', category: 'science' },
-    { question: 'What is the largest ocean on Earth?', options: ['Atlantic', 'Indian', 'Pacific', 'Arctic'], correctIndex: 2, era: 'General', funFact: 'The Pacific Ocean is larger than all the world\'s land area combined.', category: 'nature' },
+    { question: 'What is the largest ocean on Earth?', options: ['Atlantic', 'Indian', 'Pacific', 'Arctic'], correctIndex: 2, era: 'General', funFact: "The Pacific Ocean is larger than all the world's land area combined.", category: 'nature' },
     { question: 'Who painted the Mona Lisa?', options: ['Raphael', 'Michelangelo', 'Leonardo da Vinci', 'Botticelli'], correctIndex: 2, era: 'General', funFact: 'Leonardo is believed to have worked on the Mona Lisa from 1503 to 1519 and never parted with it during his lifetime.', category: 'history' },
     { question: 'How many sides does a hexagon have?', options: ['5', '6', '7', '8'], correctIndex: 1, era: 'General', funFact: 'Hexagons appear throughout nature — honeycombs use this shape because it is the most efficient way to divide space.', category: 'science' },
     { question: 'What is the capital city of Australia?', options: ['Sydney', 'Melbourne', 'Brisbane', 'Canberra'], correctIndex: 3, era: 'General', funFact: 'Canberra was chosen as a compromise between rivals Sydney and Melbourne and became the capital in 1913.', category: 'travel' },
+    { question: 'Which planet is known as the Red Planet?', options: ['Venus', 'Jupiter', 'Mars', 'Saturn'], correctIndex: 2, era: 'General', funFact: "Mars appears red because its surface is covered in iron oxide — rust. Its two small moons, Phobos and Deimos, were named after the Greek gods of fear and dread.", category: 'science' },
+    { question: 'In which country is the Taj Mahal located?', options: ['Pakistan', 'Bangladesh', 'India', 'Nepal'], correctIndex: 2, era: 'General', funFact: 'The Taj Mahal was built between 1632 and 1653 by Mughal Emperor Shah Jahan as a mausoleum for his beloved wife Mumtaz Mahal, who died in childbirth.', category: 'travel' },
+    { question: 'What is the smallest country in the world by area?', options: ['Monaco', 'San Marino', 'Vatican City', 'Liechtenstein'], correctIndex: 2, era: 'General', funFact: 'Vatican City covers just 0.44 square kilometres, making it the smallest country in the world by area and population.', category: 'travel' },
+    { question: 'How many strings does a standard violin have?', options: ['4', '5', '6', '8'], correctIndex: 0, era: 'General', funFact: 'A violin has four strings tuned to G, D, A and E. The instrument belongs to the same family as the viola, cello and double bass.', category: 'music' },
+    { question: 'What language is spoken in Brazil?', options: ['Spanish', 'Portuguese', 'French', 'English'], correctIndex: 1, era: 'General', funFact: 'Brazil is the largest Portuguese-speaking country in the world. It was colonised by Portugal in 1500, unlike most of its Spanish-speaking South American neighbours.', category: 'travel' },
   ],
 };
 
