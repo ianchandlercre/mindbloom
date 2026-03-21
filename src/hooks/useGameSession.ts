@@ -4,7 +4,7 @@ import { GameState, GameType, GameFeedback } from '@/types';
 
 export function useGameSession(userId: number, gameType: GameType, difficulty: number) {
   const [gameState, setGameState] = useState<GameState>({
-    currentRound: 0,
+    currentRound: 1,
     totalRounds: 8,
     score: 0,
     correct: 0,
@@ -19,7 +19,7 @@ export function useGameSession(userId: number, gameType: GameType, difficulty: n
 
   const startGame = useCallback((totalRounds = 8) => {
     setGameState({
-      currentRound: 0,
+      currentRound: 1,
       totalRounds,
       score: 0,
       correct: 0,
@@ -39,7 +39,7 @@ export function useGameSession(userId: number, gameType: GameType, difficulty: n
       const newIncorrect = prev.incorrect + (isCorrect ? 0 : 1);
       const newScore = prev.score + (isCorrect ? points : 0);
       const newRound = prev.currentRound + 1;
-      const isComplete = newRound >= prev.totalRounds;
+      const isComplete = newRound > prev.totalRounds;
 
       return {
         ...prev,

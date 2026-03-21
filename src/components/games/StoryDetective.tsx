@@ -22,6 +22,7 @@ export default function StoryDetective({
   currentRound, totalRounds, score, isComplete, initialRounds,
 }: Props) {
   const [passages, setPassages] = useState<StoryDetectivePassage[]>([]);
+  const [passageIndex, setPassageIndex] = useState(0);
   const [phase, setPhase] = useState<PhaseType>('reading');
   const [selectedSentences, setSelectedSentences] = useState<number[]>([]);
   const [revealed, setRevealed] = useState(false);
@@ -49,7 +50,7 @@ export default function StoryDetective({
     setPassages(shuffled.slice(0, totalRounds));
   }, [initialRounds, interests, totalRounds]);
 
-  const currentPassage = passages[currentRound - 1];
+  const currentPassage = passages[passageIndex];
 
   const handleSentenceTap = useCallback((idx: number) => {
     if (phase !== 'selecting') return;
@@ -86,16 +87,11 @@ export default function StoryDetective({
   }, [currentPassage, selectedSentences, onAnswer]);
 
   const handleNextPassage = useCallback(() => {
-    if (currentRound >= totalRounds) {
-      onComplete();
-    } else {
-      setPhase('reading');
-      setSelectedSentences([]);
-      setRevealed(false);
-      // Parent increments currentRound
-      onAnswer(false, 0); // signal round transition without double-scoring
-    }
-  }, [currentRound, totalRounds, onComplete, onAnswer]);
+    setPassageIndex(prev => prev + 1);
+    setPhase('reading');
+    setSelectedSentences([]);
+    setRevealed(false);
+  }, []);
 
   const handleReadyToSelect = useCallback(() => {
     setPhase('selecting');
@@ -110,14 +106,14 @@ export default function StoryDetective({
   }
 
   // Progress bar
-  const progress = totalRounds > 0 ? ((currentRound - 1) / totalRounds) * 100 : 0;
+  const progress = totalRounds > 0 ? (passageIndex / totalRounds) * 100 : 0;
 
   return (
     <div className="max-w-2xl mx-auto">
       {/* Progress */}
       <div className="mb-6">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-body text-warm-gray-light">Passage {currentRound} of {totalRounds}</span>
+          <span className="text-body text-warm-gray-light">Passage {passageIndex + 1} of {totalRounds}</span>
           <span className="text-body font-semibold text-warm-gray">Score: {score}</span>
         </div>
         <div className="h-2 bg-cream-dark rounded-full overflow-hidden">
@@ -227,7 +223,7 @@ export default function StoryDetective({
           onClick={handleNextPassage}
           className="w-full py-5 bg-sage text-white rounded-warm text-body-lg font-semibold hover:bg-sage-dark transition-colors shadow-warm"
         >
-          {currentRound >= totalRounds ? 'See Results' : 'Next Passage'}
+          {passageIndex + 1 >= totalRounds ? 'See Results' : 'Next Passage'}
         </button>
       )}
     </div>
