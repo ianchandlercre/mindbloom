@@ -11,9 +11,10 @@ interface Props {
   onComplete: () => void;
   score: number;
   isComplete: boolean;
+  initialRounds?: any[];
 }
 
-export default function MemoryMatch({ difficulty, interests, onAnswer, onComplete, score, isComplete }: Props) {
+export default function MemoryMatch({ difficulty, interests, onAnswer, onComplete, score, isComplete, initialRounds }: Props) {
   const [cards, setCards] = useState<MemoryMatchCard[]>([]);
   const [flipped, setFlipped] = useState<number[]>([]);
   const [matched, setMatched] = useState<Set<number>>(new Set());
@@ -22,7 +23,9 @@ export default function MemoryMatch({ difficulty, interests, onAnswer, onComplet
   const [totalPairs, setTotalPairs] = useState(0);
 
   useEffect(() => {
-    const cardData = getMemoryMatchCards(difficulty, interests);
+    const cardData = (initialRounds && initialRounds.length > 0)
+      ? initialRounds.map((r: any) => ({ emoji: r.emoji, label: r.label }))
+      : getMemoryMatchCards(difficulty, interests);
     setTotalPairs(cardData.length);
 
     // Create pairs and shuffle
@@ -42,7 +45,7 @@ export default function MemoryMatch({ difficulty, interests, onAnswer, onComplet
     setFlipped([]);
     setMatched(new Set());
     setMoves(0);
-  }, [difficulty, interests]);
+  }, [difficulty, interests, initialRounds]);
 
   const handleFlip = useCallback((index: number) => {
     if (!canFlip || matched.has(index) || flipped.includes(index) || flipped.length >= 2) return;

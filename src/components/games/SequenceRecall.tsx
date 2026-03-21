@@ -11,11 +11,12 @@ interface Props {
   totalRounds: number;
   score: number;
   isComplete: boolean;
+  initialRounds?: any[];
 }
 
 type Phase = 'watching' | 'playing' | 'feedback';
 
-export default function SequenceRecall({ difficulty, onAnswer, onComplete, currentRound, totalRounds, score, isComplete }: Props) {
+export default function SequenceRecall({ difficulty, onAnswer, onComplete, currentRound, totalRounds, score, isComplete, initialRounds }: Props) {
   const [sequence, setSequence] = useState<number[]>([]);
   const [playerInput, setPlayerInput] = useState<number[]>([]);
   const [phase, setPhase] = useState<Phase>('watching');
@@ -25,10 +26,12 @@ export default function SequenceRecall({ difficulty, onAnswer, onComplete, curre
   const timeoutRef = useRef<NodeJS.Timeout[]>([]);
 
   const generateSequence = useCallback(() => {
+    if (initialRounds && initialRounds[currentRound]?.sequence) {
+      return initialRounds[currentRound].sequence as number[];
+    }
     const length = getSequenceLength(difficulty, currentRound);
-    const seq = Array.from({ length }, () => Math.floor(Math.random() * 4));
-    return seq;
-  }, [difficulty, currentRound]);
+    return Array.from({ length }, () => Math.floor(Math.random() * 4));
+  }, [difficulty, currentRound, initialRounds]);
 
   const playSequence = useCallback((seq: number[]) => {
     setPhase('watching');

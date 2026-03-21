@@ -12,15 +12,20 @@ interface Props {
   totalRounds: number;
   score: number;
   isComplete: boolean;
+  initialRounds?: any[];
 }
 
-export default function NumberCrunch({ difficulty, onAnswer, onComplete, currentRound, totalRounds, score, isComplete }: Props) {
+export default function NumberCrunch({ difficulty, onAnswer, onComplete, currentRound, totalRounds, score, isComplete, initialRounds }: Props) {
   const [rounds, setRounds] = useState<NumberCrunchRound[]>([]);
   const [feedback, setFeedback] = useState<{ correct: boolean; message: string } | null>(null);
 
   useEffect(() => {
-    setRounds(getNumberCrunchRounds(difficulty, totalRounds));
-  }, [difficulty, totalRounds]);
+    if (initialRounds && initialRounds.length > 0) {
+      setRounds(initialRounds as NumberCrunchRound[]);
+    } else {
+      setRounds(getNumberCrunchRounds(difficulty, totalRounds));
+    }
+  }, [difficulty, totalRounds, initialRounds]);
 
   const round = rounds[currentRound];
 

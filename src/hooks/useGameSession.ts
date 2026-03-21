@@ -14,6 +14,7 @@ export function useGameSession(userId: number, gameType: GameType, difficulty: n
   });
   const [showFeedback, setShowFeedback] = useState(false);
   const [sessionId, setSessionId] = useState<number | null>(null);
+  const [aiEncouragement, setAiEncouragement] = useState<string | null>(null);
   const savedRef = useRef(false);
 
   const startGame = useCallback((totalRounds = 8) => {
@@ -27,6 +28,7 @@ export function useGameSession(userId: number, gameType: GameType, difficulty: n
       isComplete: false,
     });
     setShowFeedback(false);
+    setAiEncouragement(null);
     savedRef.current = false;
     setSessionId(null);
   }, []);
@@ -81,18 +83,25 @@ export function useGameSession(userId: number, gameType: GameType, difficulty: n
   }, [gameState, userId, gameType, difficulty]);
 
   const submitFeedback = useCallback(async (feedback: GameFeedback) => {
-    if (!sessionId) return;
+    if (!sessionId) {
+      setShowFeedback(false);
+      return;
+    }
     try {
-      await fetch('/api/feedback', {
+      const res = await fetch('/api/feedback', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId, feedback }),
+        body: JSON.stringify({ sessionId, feedback, userId }),
       });
+      const data = await res.json();
+      if (data.aiEncouragement) {
+        setAiEncouragement(data.aiEncouragement);
+      }
     } catch (e) {
       console.error('Failed to save feedback:', e);
     }
     setShowFeedback(false);
-  }, [sessionId]);
+  }, [sessionId, userId]);
 
   const accuracy = gameState.correct + gameState.incorrect > 0
     ? Math.round((gameState.correct / (gameState.correct + gameState.incorrect)) * 100)
@@ -102,6 +111,7 @@ export function useGameSession(userId: number, gameType: GameType, difficulty: n
     gameState,
     accuracy,
     showFeedback,
+    aiEncouragement,
     startGame,
     recordAnswer,
     completeGame,

@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useUser } from '@/hooks/useUser';
@@ -26,19 +26,40 @@ export default function GamePage() {
   const difficulty = parseInt(searchParams.get('difficulty') || '2');
   const config = getGameConfig(gameId);
 
-  const { gameState, accuracy, showFeedback, startGame, recordAnswer, completeGame, submitFeedback } = useGameSession(
+  const { gameState, accuracy, showFeedback, aiEncouragement, startGame, recordAnswer, completeGame, submitFeedback } = useGameSession(
     user?.id || 0,
     gameId,
     difficulty
   );
 
   const [started, setStarted] = useState(false);
+  const [aiRounds, setAiRounds] = useState<any[] | null>(null);
 
   useEffect(() => {
     if (!loading && !user) {
       router.push('/');
     }
   }, [user, loading, router]);
+
+  // Pre-fetch AI content when user is on the intro screen
+  const fetchAIContent = useCallback(async () => {
+    if (!user?.id) return;
+    try {
+      const res = await fetch(`/api/content?userId=${user.id}&gameType=${gameId}&difficulty=${difficulty}`);
+      const data = await res.json();
+      if (data.rounds && data.rounds.length > 0) {
+        setAiRounds(data.rounds);
+      }
+    } catch {
+      // Silently fall back to static content
+    }
+  }, [user?.id, gameId, difficulty]);
+
+  useEffect(() => {
+    if (user?.id && config) {
+      fetchAIContent();
+    }
+  }, [user?.id, config, fetchAIContent]);
 
   if (loading || !user || !config) {
     return (
@@ -54,7 +75,7 @@ export default function GamePage() {
   const interests: InterestArea[] = profile?.interests || [];
 
   const handleStart = () => {
-    const rounds = gameId === 'memory-match' ? 1 : 8; // Memory match uses different scoring
+    const rounds = gameId === 'memory-match' ? 1 : 8;
     startGame(rounds);
     setStarted(true);
   };
@@ -67,7 +88,7 @@ export default function GamePage() {
     submitFeedback({ enjoyment: 3, difficulty: 'just_right', playAgain: 'maybe' });
   };
 
-  // Show post-game feedback
+  // Show post-game feedback survey
   if (showFeedback) {
     return (
       <div className="min-h-screen bg-cream">
@@ -101,10 +122,18 @@ export default function GamePage() {
             <div className="text-6xl mb-4">🎉</div>
             <h2 className="text-heading font-bold text-warm-gray mb-3">Well Done!</h2>
             <p className="text-body-lg text-warm-gray mb-1">Score: {gameState.score} points</p>
-            <p className="text-body text-warm-gray-light mb-6">Accuracy: {accuracy}%</p>
+            <p className="text-body text-warm-gray-light mb-4">Accuracy: {accuracy}%</p>
+
+            {/* AI encouragement message */}
+            {aiEncouragement && (
+              <div className="mb-6 p-4 bg-soft-blue/10 rounded-warm border border-soft-blue/20">
+                <p className="text-body text-warm-gray italic">✨ {aiEncouragement}</p>
+              </div>
+            )}
+
             <div className="flex flex-col gap-3">
               <button
-                onClick={() => { setStarted(false); }}
+                onClick={() => { setAiRounds(null); setStarted(false); fetchAIContent(); }}
                 className="py-4 px-8 bg-soft-blue text-white rounded-warm text-body-lg font-medium hover:bg-soft-blue-dark transition-colors"
               >
                 Play Again
@@ -146,6 +175,11 @@ export default function GamePage() {
                   8 rounds
                 </span>
               )}
+              {aiRounds && aiRounds.length > 0 && (
+                <span className="px-4 py-2 bg-soft-blue/10 border border-soft-blue/30 rounded-warm text-body text-soft-blue">
+                  ✨ Personalized
+                </span>
+              )}
             </div>
 
             <button
@@ -160,7 +194,7 @@ export default function GamePage() {
     );
   }
 
-  // Active game
+  // Active game — pass AI rounds as optional prop
   const gameProps = {
     difficulty,
     interests,
@@ -170,6 +204,7 @@ export default function GamePage() {
     totalRounds: gameState.totalRounds,
     score: gameState.score,
     isComplete: gameState.isComplete,
+    initialRounds: aiRounds || undefined,
   };
 
   return (
@@ -198,11 +233,12 @@ export default function GamePage() {
             onComplete={completeGame}
             score={gameState.score}
             isComplete={gameState.isComplete}
+            initialRounds={aiRounds || undefined}
           />
         )}
-        {gameId === 'sequence-recall' && <SequenceRecall difficulty={difficulty} onAnswer={recordAnswer} onComplete={completeGame} currentRound={gameState.currentRound} totalRounds={gameState.totalRounds} score={gameState.score} isComplete={gameState.isComplete} />}
-        {gameId === 'pattern-finder' && <PatternFinder difficulty={difficulty} onAnswer={recordAnswer} onComplete={completeGame} currentRound={gameState.currentRound} totalRounds={gameState.totalRounds} score={gameState.score} isComplete={gameState.isComplete} />}
-        {gameId === 'number-crunch' && <NumberCrunch difficulty={difficulty} onAnswer={recordAnswer} onComplete={completeGame} currentRound={gameState.currentRound} totalRounds={gameState.totalRounds} score={gameState.score} isComplete={gameState.isComplete} />}
+        {gameId === 'sequence-recall' && <SequenceRecall {...gameProps} />}
+        {gameId === 'pattern-finder' && <PatternFinder {...gameProps} />}
+        {gameId === 'number-crunch' && <NumberCrunch {...gameProps} />}
         {gameId === 'knowledge-quiz' && <KnowledgeQuiz {...gameProps} />}
       </main>
     </div>

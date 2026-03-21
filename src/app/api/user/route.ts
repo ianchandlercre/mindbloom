@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getProfile, getSessionStats, getGameSessions } from '@/lib/db';
+import { getProfile, getSessionStats, getGameSessions, getLatestAIAnalysis } from '@/lib/db';
 import { getRecommendedGames } from '@/lib/adaptive-engine';
+import { RecommendedGame } from '@/types';
 
 export async function GET(request: NextRequest) {
   try {
@@ -18,14 +19,44 @@ export async function GET(request: NextRequest) {
     }
 
     if (action === 'recommendations') {
-      const sessions = await getGameSessions(userId, 50);
-      const recommendations = getRecommendedGames(
+      const [sessions, aiAnalysis] = await Promise.all([
+        getGameSessions(userId, 50),
+        getLatestAIAnalysis(userId),
+      ]);
+
+      // Get base deterministic recommendations
+      const baseRecs = getRecommendedGames(
         profile.dimensions,
         profile.interests,
         sessions,
         profile.difficultyLevel
       );
-      return NextResponse.json({ recommendations });
+
+      // Merge AI priority boosts if available
+      let recommendations: RecommendedGame[] = baseRecs;
+      if (aiAnalysis && aiAnalysis.gameRecommendations?.length > 0) {
+        const boostMap = new Map<string, { reason: string; priorityBoost: number }>();
+        for (const rec of aiAnalysis.gameRecommendations) {
+          boostMap.set(rec.gameType, { reason: rec.reason, priorityBoost: rec.priorityBoost || 0 });
+        }
+
+        recommendations = baseRecs.map(rec => {
+          const aiBoost = boostMap.get(rec.config.id);
+          if (!aiBoost) return rec;
+          return {
+            ...rec,
+            matchScore: Math.min(99, Math.max(40, rec.matchScore + aiBoost.priorityBoost)),
+            reason: aiBoost.reason || rec.reason,
+          };
+        }).sort((a, b) => b.matchScore - a.matchScore);
+      }
+
+      return NextResponse.json({
+        recommendations,
+        aiInsights: aiAnalysis?.insights || null,
+        aiEncouragement: aiAnalysis?.encouragement || null,
+        lastSessionSummary: aiAnalysis?.sessionSummary || null,
+      });
     }
 
     const stats = await getSessionStats(userId);

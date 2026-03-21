@@ -43,6 +43,30 @@ async function ensureInitialized(): Promise<void> {
       created_at TIMESTAMPTZ DEFAULT NOW()
     )
   `;
+  await sql`
+    CREATE TABLE IF NOT EXISTS ai_recommendations (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER NOT NULL REFERENCES users(id),
+      session_id INTEGER REFERENCES game_sessions(id),
+      encouragement TEXT,
+      session_summary TEXT,
+      game_recommendations TEXT,
+      insights TEXT,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    )
+  `;
+  await sql`
+    CREATE TABLE IF NOT EXISTS ai_usage (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER,
+      model TEXT NOT NULL,
+      input_tokens INTEGER NOT NULL DEFAULT 0,
+      output_tokens INTEGER NOT NULL DEFAULT 0,
+      cost_usd REAL NOT NULL DEFAULT 0,
+      purpose TEXT,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    )
+  `;
   initialized = true;
 }
 
@@ -200,4 +224,85 @@ export async function hasSurveyCompleted(userId: number): Promise<boolean> {
   await ensureInitialized();
   const { rows } = await sql`SELECT COUNT(*) as count FROM survey_responses WHERE user_id = ${userId}`;
   return parseInt(rows[0]?.count || '0') >= 10;
+}
+
+// ===== AI Operations =====
+
+export async function saveAIAnalysis(
+  userId: number,
+  sessionId: number | null,
+  analysis: {
+    encouragement?: string;
+    sessionSummary?: string;
+    gameRecommendations?: any[];
+    insights?: string;
+  }
+) {
+  await ensureInitialized();
+  await sql`
+    INSERT INTO ai_recommendations (user_id, session_id, encouragement, session_summary, game_recommendations, insights)
+    VALUES (
+      ${userId},
+      ${sessionId},
+      ${analysis.encouragement || null},
+      ${analysis.sessionSummary || null},
+      ${analysis.gameRecommendations ? JSON.stringify(analysis.gameRecommendations) : null},
+      ${analysis.insights || null}
+    )
+  `;
+}
+
+export async function getLatestAIAnalysis(userId: number) {
+  await ensureInitialized();
+  const { rows } = await sql`
+    SELECT * FROM ai_recommendations WHERE user_id = ${userId}
+    ORDER BY created_at DESC LIMIT 1
+  `;
+  if (rows.length === 0) return null;
+  const row = rows[0];
+  return {
+    encouragement: row.encouragement,
+    sessionSummary: row.session_summary,
+    gameRecommendations: row.game_recommendations ? JSON.parse(row.game_recommendations) : [],
+    insights: row.insights,
+    createdAt: row.created_at,
+  };
+}
+
+export async function trackAIUsage(
+  userId: number | null,
+  model: string,
+  inputTokens: number,
+  outputTokens: number,
+  purpose: string
+) {
+  await ensureInitialized();
+  // Approximate cost in USD (based on current pricing)
+  const costUsd = model.includes('haiku')
+    ? (inputTokens * 0.0000008) + (outputTokens * 0.000004)
+    : model.includes('sonnet')
+    ? (inputTokens * 0.000003) + (outputTokens * 0.000015)
+    : 0; // Gemini is effectively free at this scale
+
+  await sql`
+    INSERT INTO ai_usage (user_id, model, input_tokens, output_tokens, cost_usd, purpose)
+    VALUES (${userId}, ${model}, ${inputTokens}, ${outputTokens}, ${costUsd}, ${purpose})
+  `;
+  return costUsd;
+}
+
+export async function getMonthlyAICost(): Promise<number> {
+  await ensureInitialized();
+  const { rows } = await sql`
+    SELECT COALESCE(SUM(cost_usd), 0) as total
+    FROM ai_usage
+    WHERE created_at >= DATE_TRUNC('month', NOW())
+  `;
+  return parseFloat(rows[0]?.total || '0');
+}
+
+export async function getUserSessionCount(userId: number): Promise<number> {
+  await ensureInitialized();
+  const { rows } = await sql`SELECT COUNT(*) as count FROM game_sessions WHERE user_id = ${userId}`;
+  return parseInt(rows[0]?.count || '0');
 }
