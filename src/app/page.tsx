@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@/hooks/useUser';
+import { TreePine } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -12,7 +13,6 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  // Redirect if already logged in
   if (user && !loading) {
     router.push('/dashboard');
     return null;
@@ -47,36 +47,39 @@ export default function LoginPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-cream">
-        <div className="text-center">
-          <div className="text-6xl mb-4 animate-pulse-gentle">🌱</div>
-          <p className="text-body-lg text-warm-gray-light">Loading...</p>
-        </div>
+        <p className="text-body-lg text-stone-light">Loading...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-cream px-4">
+    <div className="min-h-screen bg-cream flex flex-col items-center justify-center px-6 py-12">
       <div className="w-full max-w-md animate-slide-up">
-        {/* Logo */}
-        <div className="text-center mb-8">
-          <div className="text-7xl mb-3">🌱</div>
-          <h1 className="text-heading-lg font-bold text-warm-gray">MindBloom</h1>
-          <p className="text-body-lg text-warm-gray-light mt-2">
-            Keep your mind sharp with personalized brain training
+
+        {/* Wordmark */}
+        <div className="text-center mb-10">
+          <div className="flex items-center justify-center mb-5">
+            <div className="w-16 h-16 bg-forest rounded-warm-xl flex items-center justify-center shadow-forest">
+              <TreePine className="w-9 h-9 text-amber-light" />
+            </div>
+          </div>
+          <h1 className="font-serif text-heading-xl font-bold text-forest-dark mb-2">MindBloom</h1>
+          <p className="text-body-lg text-stone-light">
+            Personalized brain training, crafted for you
           </p>
         </div>
 
         {/* Card */}
-        <div className="bg-white rounded-warm-lg shadow-warm-md p-8">
-          {/* Tabs */}
-          <div className="flex gap-1 mb-6 bg-cream rounded-warm p-1">
+        <div className="bg-white rounded-warm-xl shadow-warm-md border border-cream-deep p-8">
+
+          {/* Mode tabs */}
+          <div className="flex gap-1 mb-7 bg-cream rounded-warm p-1">
             <button
               onClick={() => { setMode('login'); setError(''); }}
               className={`flex-1 py-3 rounded-warm text-body font-medium transition-all ${
                 mode === 'login'
-                  ? 'bg-white text-soft-blue shadow-warm'
-                  : 'text-warm-gray-light hover:text-warm-gray'
+                  ? 'bg-white text-forest shadow-warm'
+                  : 'text-stone-light hover:text-stone'
               }`}
             >
               Welcome Back
@@ -85,18 +88,18 @@ export default function LoginPage() {
               onClick={() => { setMode('register'); setError(''); }}
               className={`flex-1 py-3 rounded-warm text-body font-medium transition-all ${
                 mode === 'register'
-                  ? 'bg-white text-soft-blue shadow-warm'
-                  : 'text-warm-gray-light hover:text-warm-gray'
+                  ? 'bg-white text-forest shadow-warm'
+                  : 'text-stone-light hover:text-stone'
               }`}
             >
-              I&apos;m New Here
+              New Member
             </button>
           </div>
 
           <form onSubmit={handleSubmit}>
             {/* Name */}
             <div className="mb-5">
-              <label htmlFor="name" className="block text-body font-medium text-warm-gray mb-2">
+              <label htmlFor="name" className="block text-body font-semibold text-stone mb-2">
                 Your First Name
               </label>
               <input
@@ -105,7 +108,7 @@ export default function LoginPage() {
                 value={name}
                 onChange={e => setName(e.target.value)}
                 placeholder="e.g. Robert"
-                className="w-full text-body-lg p-4 border-2 border-cream-dark rounded-warm focus:border-soft-blue focus:outline-none bg-cream"
+                className="w-full text-body-lg p-4 border-2 border-cream-deep rounded-warm focus:border-forest focus:outline-none bg-cream text-stone placeholder-stone-pale"
                 autoFocus
                 autoComplete="name"
               />
@@ -113,7 +116,7 @@ export default function LoginPage() {
 
             {/* PIN */}
             <div className="mb-6">
-              <label htmlFor="pin" className="block text-body font-medium text-warm-gray mb-2">
+              <label htmlFor="pin" className="block text-body font-semibold text-stone mb-2">
                 4-Digit PIN
               </label>
               <input
@@ -123,24 +126,21 @@ export default function LoginPage() {
                 pattern="[0-9]*"
                 maxLength={4}
                 value={pin}
-                onChange={e => {
-                  const val = e.target.value.replace(/\D/g, '').slice(0, 4);
-                  setPin(val);
-                }}
+                onChange={e => setPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
                 placeholder="• • • •"
-                className="w-full text-body-lg p-4 border-2 border-cream-dark rounded-warm focus:border-soft-blue focus:outline-none bg-cream text-center tracking-widest"
+                className="w-full text-body-lg p-4 border-2 border-cream-deep rounded-warm focus:border-forest focus:outline-none bg-cream text-center tracking-widest text-stone"
                 autoComplete="off"
               />
-              <p className="text-sm text-warm-gray-light mt-2">
+              <p className="text-sm text-stone-light mt-2">
                 {mode === 'register'
-                  ? 'Choose a simple 4-digit PIN you\'ll remember'
+                  ? 'Choose a simple 4-digit PIN you will remember'
                   : 'Enter the PIN you created when signing up'}
               </p>
             </div>
 
             {/* Error */}
             {error && (
-              <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-warm text-body animate-fade-in">
+              <div className="mb-5 p-4 bg-red-50 text-red-700 rounded-warm text-body border border-red-200 animate-fade-in">
                 {error}
               </div>
             )}
@@ -149,16 +149,15 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={submitting}
-              className="w-full py-4 bg-soft-blue text-white rounded-warm text-body-lg font-semibold hover:bg-soft-blue-dark transition-colors disabled:opacity-50 shadow-warm"
+              className="w-full py-5 bg-forest text-white rounded-warm text-body-lg font-semibold hover:bg-forest-dark transition-colors disabled:opacity-50 shadow-forest"
             >
               {submitting ? 'Please wait...' : mode === 'login' ? 'Sign In' : 'Create Account'}
             </button>
           </form>
         </div>
 
-        {/* Footer */}
-        <p className="text-center text-sm text-warm-gray-light mt-6">
-          A gentle brain training experience designed for you
+        <p className="text-center text-sm text-stone-light mt-6">
+          A thoughtful brain training experience designed for you
         </p>
       </div>
     </div>

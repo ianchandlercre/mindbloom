@@ -45,13 +45,15 @@ export interface SurveyQuestion {
   id: string;
   text: string;
   subtitle?: string;
+  type?: 'ranking' | 'choice';
+  maxRank?: number;
   answers: SurveyAnswer[];
 }
 
 export interface SurveyAnswer {
   id: string;
   text: string;
-  emoji: string;
+  emoji?: string;
   dimensionWeights: Partial<CognitiveProfile>;
   interestTags: InterestArea[];
 }

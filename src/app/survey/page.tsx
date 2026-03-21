@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@/hooks/useUser';
 import SurveyFlow from '@/components/survey/SurveyFlow';
+import { TreePine } from 'lucide-react';
 
 export default function SurveyPage() {
   const router = useRouter();
@@ -17,10 +18,7 @@ export default function SurveyPage() {
   if (loading || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-cream">
-        <div className="text-center">
-          <div className="text-6xl mb-4 animate-pulse-gentle">🌱</div>
-          <p className="text-body-lg text-warm-gray-light">Loading...</p>
-        </div>
+        <p className="text-body-lg text-stone-light">Loading...</p>
       </div>
     );
   }
@@ -32,19 +30,17 @@ export default function SurveyPage() {
 
   return (
     <div className="min-h-screen bg-cream">
-      {/* Header */}
-      <header className="sticky top-0 bg-cream/95 backdrop-blur-sm border-b border-cream-dark z-10">
-        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
+      <header className="sticky top-0 bg-cream/95 backdrop-blur-sm border-b border-cream-deep z-10">
+        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-2xl">🌱</span>
-            <span className="text-body font-bold text-warm-gray">MindBloom</span>
+            <TreePine className="w-6 h-6 text-forest" />
+            <span className="font-serif text-body font-bold text-forest-dark">MindBloom</span>
           </div>
-          <span className="text-body text-warm-gray-light">Getting to know you, {user.name}...</span>
+          <span className="text-body text-stone-light">Welcome, {user.name}</span>
         </div>
       </header>
 
-      {/* Survey */}
-      <main className="max-w-4xl mx-auto px-4 py-8">
+      <main className="max-w-4xl mx-auto px-6 py-10">
         <SurveyFlow userId={user.id} onComplete={handleComplete} />
       </main>
     </div>
