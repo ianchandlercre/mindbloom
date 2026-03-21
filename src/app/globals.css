@@ -141,6 +141,34 @@
     @apply badge bg-sage-100 text-sage-700;
   }
 
+  /* Amber accent button */
+  .btn-amber {
+    @apply px-8 py-4 bg-amber-500 text-white rounded-lodge font-semibold text-body transition-all duration-200;
+  }
+
+  .btn-amber:hover {
+    @apply bg-amber-600 shadow-lodge-md;
+  }
+
+  .btn-amber:disabled {
+    @apply opacity-50 cursor-not-allowed;
+  }
+
+  /* Survey option card */
+  .survey-option {
+    @apply relative flex items-center gap-4 p-5 rounded-lodge-lg border-2 border-cream-300 bg-white
+           cursor-pointer transition-all duration-200 select-none;
+    min-height: 72px;
+  }
+
+  .survey-option:hover {
+    @apply border-forest-300 bg-forest-50 shadow-lodge;
+  }
+
+  .survey-option-ranked {
+    @apply border-forest-500 bg-forest-50 shadow-lodge;
+  }
+
   /* Rank number badge */
   .rank-badge {
     @apply inline-flex items-center justify-center w-9 h-9 rounded-full text-sm font-bold;

@@ -1,9 +1,8 @@
 'use client';
 import { useState, useCallback } from 'react';
-import { SurveyResponse } from '@/types';
-import { SURVEY_QUESTIONS } from '@/lib/profile-calculator';
+import { Trees } from 'lucide-react';
+import { RANKING_QUESTIONS, rankingsToResponses } from '@/lib/profile-calculator';
 import SurveyQuestion from './SurveyQuestion';
-import { ArrowLeft, ArrowRight, Check } from 'lucide-react';
 
 interface Props {
   userId: number;
@@ -12,77 +11,71 @@ interface Props {
 
 export default function SurveyFlow({ userId, onComplete }: Props) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [responses, setResponses] = useState<SurveyResponse[]>([]);
+  // ranking state: questionId -> ordered array of selected option IDs
+  const [allRankings, setAllRankings] = useState<Map<string, string[]>>(new Map());
+  // scale state: questionId -> 1-5 value
+  const [allScales, setAllScales] = useState<Map<string, number>>(new Map());
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
 
-  const questions = SURVEY_QUESTIONS;
+  const questions = RANKING_QUESTIONS;
   const currentQuestion = questions[currentIndex];
-  const currentResponse = responses.find(r => r.questionId === currentQuestion?.id);
+  const currentRanking = allRankings.get(currentQuestion.id) ?? [];
+  const currentScale = allScales.get(currentQuestion.id) ?? 0;
 
-  const updateResponse = useCallback((questionId: string, update: Partial<SurveyResponse>) => {
-    setResponses(prev => {
-      const existing = prev.find(r => r.questionId === questionId);
-      if (existing) {
-        return prev.map(r => r.questionId === questionId ? { ...r, ...update } : r);
+  // Determine if Next can be activated
+  const canProceed = currentQuestion.type === 'ranking'
+    ? currentRanking.length >= (currentQuestion.minRanks ?? 1)
+    : currentScale > 0;
+
+  const handleRankToggle = useCallback((optionId: string) => {
+    setAllRankings(prev => {
+      const next = new Map(prev);
+      const current = next.get(currentQuestion.id) ?? [];
+      if (current.includes(optionId)) {
+        next.set(currentQuestion.id, current.filter(id => id !== optionId));
+      } else {
+        next.set(currentQuestion.id, [...current, optionId]);
       }
-      return [...prev, { questionId, answerId: '', ...update }];
+      return next;
     });
-  }, []);
+  }, [currentQuestion.id]);
 
-  // Ranking handlers
-  const handleRank = useCallback((optionId: string) => {
-    if (!currentQuestion) return;
-    const current = currentResponse?.rankings || [];
-    if (!current.includes(optionId)) {
-      updateResponse(currentQuestion.id, { rankings: [...current, optionId] });
-    }
-  }, [currentQuestion, currentResponse, updateResponse]);
-
-  const handleUnrank = useCallback((optionId: string) => {
-    if (!currentQuestion) return;
-    const current = currentResponse?.rankings || [];
-    updateResponse(currentQuestion.id, { rankings: current.filter(id => id !== optionId) });
-  }, [currentQuestion, currentResponse, updateResponse]);
-
-  // Scale handler
-  const handleScale = useCallback((value: number) => {
-    if (!currentQuestion) return;
-    updateResponse(currentQuestion.id, { scaleValue: value });
-  }, [currentQuestion, updateResponse]);
-
-  // Navigation
-  const canProceed = () => {
-    if (!currentQuestion) return false;
-    if (currentQuestion.type === 'ranking') {
-      const rankings = currentResponse?.rankings || [];
-      return rankings.length === (currentQuestion.options?.length || 0);
-    }
-    if (currentQuestion.type === 'scale') {
-      return currentResponse?.scaleValue !== undefined;
-    }
-    return !!currentResponse?.answerId;
-  };
+  const handleScaleSelect = useCallback((value: number) => {
+    setAllScales(prev => {
+      const next = new Map(prev);
+      next.set(currentQuestion.id, value);
+      return next;
+    });
+  }, [currentQuestion.id]);
 
   const handleNext = useCallback(async () => {
-    if (!canProceed()) return;
+    if (!canProceed) return;
 
     if (currentIndex < questions.length - 1) {
       setCurrentIndex(currentIndex + 1);
     } else {
       setSubmitting(true);
+      setError('');
       try {
-        await fetch('/api/survey', {
+        const responses = rankingsToResponses(allRankings, allScales);
+        const res = await fetch('/api/survey', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ userId, responses }),
         });
+        if (!res.ok) {
+          const data = await res.json();
+          throw new Error(data.error || 'Server error');
+        }
         onComplete();
-      } catch (e) {
-        console.error('Survey submit error:', e);
+      } catch (e: unknown) {
+        const msg = e instanceof Error ? e.message : 'Something went wrong. Please try again.';
+        setError(msg);
         setSubmitting(false);
       }
     }
-  }, [currentIndex, questions.length, userId, responses, onComplete]);
+  }, [canProceed, currentIndex, questions.length, allRankings, allScales, userId, onComplete]);
 
   const handleBack = useCallback(() => {
     if (currentIndex > 0) {
@@ -92,72 +85,64 @@ export default function SurveyFlow({ userId, onComplete }: Props) {
 
   if (!currentQuestion) return null;
 
-  const isLast = currentIndex === questions.length - 1;
+  const isLastQuestion = currentIndex === questions.length - 1;
 
   return (
     <div className="max-w-2xl mx-auto">
-      {/* Welcome header on first question */}
+      {/* Welcome on first question */}
       {currentIndex === 0 && (
         <div className="text-center mb-10 animate-slide-up">
-          <h1 className="text-heading-lg font-display font-bold text-bark mb-3">
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-forest-100 rounded-full mb-5">
+            <Trees className="w-10 h-10 text-forest-600" />
+          </div>
+          <h1 className="text-heading-lg text-bark mb-3">
             Let&apos;s Get to Know You
           </h1>
-          <p className="text-body-lg text-bark-light max-w-md mx-auto">
-            Rank your preferences so we can create a brain training experience tailored just for you.
-            There are no wrong answers.
+          <p className="text-body-lg text-bark-light max-w-lg mx-auto">
+            A few quick questions help us personalize your experience.
+            There are no right or wrong answers &mdash; just your preferences.
           </p>
         </div>
       )}
 
-      {/* Question */}
-      {currentQuestion.type === 'scale' ? (
+      {/* Question card */}
+      <div className="lodge-card p-8 mb-6">
         <SurveyQuestion
           question={currentQuestion}
-          scaleValue={currentResponse?.scaleValue ?? null}
-          onScale={handleScale}
+          ranking={currentRanking}
+          scaleValue={currentScale}
+          onRankToggle={handleRankToggle}
+          onScaleSelect={handleScaleSelect}
           questionNumber={currentIndex + 1}
           totalQuestions={questions.length}
         />
-      ) : (
-        <SurveyQuestion
-          question={currentQuestion}
-          rankings={currentResponse?.rankings || []}
-          onRank={handleRank}
-          onUnrank={handleUnrank}
-          questionNumber={currentIndex + 1}
-          totalQuestions={questions.length}
-        />
+      </div>
+
+      {/* Error */}
+      {error && (
+        <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lodge text-body animate-fade-in">
+          {error}
+        </div>
       )}
 
       {/* Navigation */}
-      <div className="flex justify-between mt-10 max-w-2xl mx-auto">
+      <div className="flex justify-between items-center">
         <button
           onClick={handleBack}
           disabled={currentIndex === 0}
-          className="flex items-center gap-2 py-4 px-6 rounded-lodge text-body font-medium text-bark-lighter hover:text-bark disabled:opacity-30 transition-colors"
+          className="py-4 px-8 rounded-lodge text-body font-medium text-bark-light hover:text-bark disabled:opacity-30 transition-colors"
+          type="button"
         >
-          <ArrowLeft className="w-4 h-4" />
           Back
         </button>
 
         <button
           onClick={handleNext}
-          disabled={!canProceed() || submitting}
-          className="flex items-center gap-2 btn-primary disabled:opacity-50"
+          disabled={!canProceed || submitting}
+          type="button"
+          className="py-4 px-10 bg-forest-600 text-white rounded-lodge text-body-lg font-semibold hover:bg-forest-700 transition-colors disabled:opacity-40 shadow-lodge hover:shadow-lodge-md"
         >
-          {submitting ? (
-            'Saving...'
-          ) : isLast ? (
-            <>
-              <Check className="w-5 h-5" />
-              Finish
-            </>
-          ) : (
-            <>
-              Next
-              <ArrowRight className="w-4 h-4" />
-            </>
-          )}
+          {submitting ? 'Saving...' : isLastQuestion ? 'Finish' : 'Next'}
         </button>
       </div>
     </div>

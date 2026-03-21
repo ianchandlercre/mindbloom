@@ -1,199 +1,146 @@
 'use client';
-import { SurveyQuestion as SQType, RankingOption } from '@/types';
-import { GripVertical, Check } from 'lucide-react';
+import { RankingQuestion } from '@/lib/profile-calculator';
 
-interface RankingProps {
-  question: SQType;
-  rankings: string[];
-  onRank: (optionId: string) => void;
-  onUnrank: (optionId: string) => void;
+interface Props {
+  question: RankingQuestion;
+  /** For ranking type: ordered array of selected option IDs (index 0 = rank 1) */
+  ranking: string[];
+  /** For scale type: selected value 1–5, or 0 for unset */
+  scaleValue: number;
+  onRankToggle: (optionId: string) => void;
+  onScaleSelect: (value: number) => void;
   questionNumber: number;
   totalQuestions: number;
 }
 
-interface ScaleProps {
-  question: SQType;
-  scaleValue: number | null;
-  onScale: (value: number) => void;
-  questionNumber: number;
-  totalQuestions: number;
-}
-
-type Props = RankingProps | ScaleProps;
-
-function isScaleProps(props: Props): props is ScaleProps {
-  return 'scaleValue' in props;
-}
-
-export default function SurveyQuestion(props: Props) {
-  const { question, questionNumber, totalQuestions } = props;
+export default function SurveyQuestion({
+  question,
+  ranking,
+  scaleValue,
+  onRankToggle,
+  onScaleSelect,
+  questionNumber,
+  totalQuestions,
+}: Props) {
+  const progress = (questionNumber / totalQuestions) * 100;
 
   return (
     <div className="animate-fade-in">
-      {/* Progress bar */}
-      <div className="flex justify-between items-center mb-3">
-        <span className="text-body text-bark-lighter">
-          Question {questionNumber} of {totalQuestions}
-        </span>
-        <span className="text-body text-forest-600 font-medium">
-          {Math.round((questionNumber / totalQuestions) * 100)}%
-        </span>
-      </div>
-      <div className="w-full bg-wood-100 rounded-full h-2 mb-8">
-        <div
-          className="bg-forest-500 rounded-full h-2 transition-all duration-500 ease-out"
-          style={{ width: `${((questionNumber - 1) / totalQuestions) * 100}%` }}
-        />
+      {/* Progress */}
+      <div className="mb-6">
+        <div className="flex justify-between text-body text-bark-lighter mb-2">
+          <span>Question {questionNumber} of {totalQuestions}</span>
+          <span>{Math.round(progress)}% complete</span>
+        </div>
+        <div className="h-2 bg-cream-300 rounded-full overflow-hidden">
+          <div
+            className="h-full bg-forest-500 rounded-full transition-all duration-500"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
       </div>
 
       {/* Question text */}
-      <div className="text-center mb-8">
-        <h2 className="text-heading font-display font-bold text-bark mb-2">{question.text}</h2>
+      <div className="mb-6">
+        <h2 className="text-heading text-bark mb-2">{question.text}</h2>
         {question.subtitle && (
           <p className="text-body text-bark-light">{question.subtitle}</p>
         )}
       </div>
 
-      {/* Render based on type */}
-      {question.type === 'scale' && isScaleProps(props) ? (
-        <ScaleInput
-          question={question}
-          value={props.scaleValue}
-          onSelect={props.onScale}
-        />
-      ) : !isScaleProps(props) ? (
-        <RankingInput
-          options={question.options || []}
-          rankings={props.rankings}
-          onRank={props.onRank}
-          onUnrank={props.onUnrank}
-        />
-      ) : null}
-    </div>
-  );
-}
+      {/* Ranking type */}
+      {question.type === 'ranking' && (
+        <div className="space-y-3">
+          {question.options.map(option => {
+            const rankIndex = ranking.indexOf(option.id);
+            const isRanked = rankIndex !== -1;
+            const rankNumber = rankIndex + 1;
 
-function RankingInput({
-  options,
-  rankings,
-  onRank,
-  onUnrank,
-}: {
-  options: RankingOption[];
-  rankings: string[];
-  onRank: (id: string) => void;
-  onUnrank: (id: string) => void;
-}) {
-  const rankedOptions = rankings.map(id => options.find(o => o.id === id)).filter(Boolean) as RankingOption[];
-  const unrankedOptions = options.filter(o => !rankings.includes(o.id));
+            return (
+              <button
+                key={option.id}
+                onClick={() => onRankToggle(option.id)}
+                className={`survey-option w-full text-left ${isRanked ? 'survey-option-ranked' : ''}`}
+                style={{ minHeight: '72px' }}
+                type="button"
+                aria-label={isRanked ? `Ranked ${rankNumber}: ${option.text}. Tap to remove.` : `${option.text}. Tap to rank.`}
+              >
+                {/* Rank badge */}
+                <div className="flex-shrink-0">
+                  {isRanked ? (
+                    <span className="rank-badge-active" aria-hidden="true">{rankNumber}</span>
+                  ) : (
+                    <span className="rank-badge-inactive" aria-hidden="true">?</span>
+                  )}
+                </div>
 
-  return (
-    <div className="max-w-2xl mx-auto space-y-3">
-      {/* Instructions */}
-      <p className="text-sm text-bark-lighter text-center mb-4">
-        Tap items to rank them in order of preference. Tap a ranked item to remove it.
-      </p>
+                {/* Option text */}
+                <span className={`text-body flex-1 ${isRanked ? 'text-forest-800 font-medium' : 'text-bark'}`}>
+                  {option.text}
+                </span>
 
-      {/* Ranked items */}
-      {rankedOptions.length > 0 && (
-        <div className="space-y-2 mb-4">
-          {rankedOptions.map((option, idx) => (
-            <button
-              key={option.id}
-              onClick={() => onUnrank(option.id)}
-              className="w-full flex items-center gap-3 p-4 rounded-lodge-lg bg-forest-50 border-2 border-forest-300 text-left transition-all hover:bg-forest-100 group min-h-[60px]"
-            >
-              <span className="rank-badge-active flex-shrink-0">
-                {idx + 1}
-              </span>
-              <span className="text-body font-medium text-bark flex-1">{option.text}</span>
-              <Check className="w-5 h-5 text-forest-600 flex-shrink-0 opacity-60" />
-            </button>
-          ))}
+                {/* Selected indicator */}
+                {isRanked && (
+                  <span className="flex-shrink-0 text-forest-500">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                      <polyline points="3,10 8,15 17,5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </span>
+                )}
+              </button>
+            );
+          })}
+
+          {/* Hint text */}
+          <p className="text-sm text-bark-lighter pt-2 text-center">
+            {ranking.length === 0
+              ? 'Tap an option to give it your top ranking.'
+              : ranking.length < (question.minRanks ?? 1)
+              ? `Rank ${(question.minRanks ?? 1) - ranking.length} more to continue.`
+              : 'Tap again to remove a ranking, or keep going.'}
+          </p>
         </div>
       )}
 
-      {/* Divider when there are both ranked and unranked */}
-      {rankedOptions.length > 0 && unrankedOptions.length > 0 && (
-        <div className="divider-nature !my-4" />
-      )}
+      {/* Scale type */}
+      {question.type === 'scale' && (
+        <div>
+          {question.scaleLabels && (
+            <div className="flex justify-between text-body text-bark-lighter mb-4">
+              <span>{question.scaleLabels.min}</span>
+              <span>{question.scaleLabels.max}</span>
+            </div>
+          )}
 
-      {/* Unranked items */}
-      {unrankedOptions.length > 0 && (
-        <div className="space-y-2">
-          {unrankedOptions.map(option => (
-            <button
-              key={option.id}
-              onClick={() => onRank(option.id)}
-              className="w-full flex items-center gap-3 p-4 rounded-lodge-lg bg-white border-2 border-wood-100 text-left transition-all hover:border-forest-300 hover:bg-forest-50/50 group min-h-[60px]"
-            >
-              <span className="rank-badge-inactive flex-shrink-0 group-hover:bg-forest-100 group-hover:text-forest-600 transition-colors">
-                <GripVertical className="w-4 h-4" />
-              </span>
-              <span className="text-body text-bark-light group-hover:text-bark transition-colors flex-1">
-                {option.text}
-              </span>
-            </button>
-          ))}
+          <div className="flex gap-3 justify-center">
+            {[1, 2, 3, 4, 5].map(value => {
+              const isSelected = scaleValue === value;
+              return (
+                <button
+                  key={value}
+                  onClick={() => onScaleSelect(value)}
+                  type="button"
+                  style={{ minHeight: '72px', minWidth: '60px' }}
+                  className={`flex-1 flex flex-col items-center justify-center rounded-lodge-lg border-2 font-bold text-heading transition-all duration-200 ${
+                    isSelected
+                      ? 'bg-forest-600 border-forest-600 text-white shadow-lodge-md scale-105'
+                      : 'bg-white border-cream-300 text-bark hover:border-forest-300 hover:bg-forest-50'
+                  }`}
+                  aria-label={`${value} out of 5${isSelected ? ', selected' : ''}`}
+                  aria-pressed={isSelected}
+                >
+                  {value}
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="flex justify-between text-sm text-bark-lighter mt-3 px-1">
+            {[1, 2, 3, 4, 5].map(v => (
+              <span key={v} className="flex-1 text-center">{v}</span>
+            ))}
+          </div>
         </div>
-      )}
-
-      {/* Completion indicator */}
-      {unrankedOptions.length === 0 && (
-        <p className="text-center text-sm text-forest-600 font-medium mt-4 animate-fade-in">
-          All ranked. You can tap any item to reorder.
-        </p>
-      )}
-    </div>
-  );
-}
-
-function ScaleInput({
-  question,
-  value,
-  onSelect,
-}: {
-  question: SQType;
-  value: number | null;
-  onSelect: (v: number) => void;
-}) {
-  const min = question.scaleMin || 1;
-  const max = question.scaleMax || 5;
-  const steps = Array.from({ length: max - min + 1 }, (_, i) => min + i);
-
-  return (
-    <div className="max-w-xl mx-auto">
-      {/* Scale labels */}
-      <div className="flex justify-between mb-4 px-2">
-        <span className="text-sm text-bark-lighter max-w-[40%]">{question.scaleMinLabel}</span>
-        <span className="text-sm text-bark-lighter max-w-[40%] text-right">{question.scaleMaxLabel}</span>
-      </div>
-
-      {/* Scale buttons */}
-      <div className="flex gap-3 justify-center">
-        {steps.map(step => {
-          const isSelected = value === step;
-          return (
-            <button
-              key={step}
-              onClick={() => onSelect(step)}
-              className={`w-16 h-16 rounded-full text-heading-sm font-bold transition-all duration-200 ${
-                isSelected
-                  ? 'bg-forest-600 text-white shadow-lodge-md scale-110'
-                  : 'bg-white border-2 border-wood-200 text-bark-light hover:border-forest-300 hover:text-forest-600'
-              }`}
-            >
-              {step}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Current selection label */}
-      {value !== null && (
-        <p className="text-center text-body text-forest-600 font-medium mt-6 animate-fade-in">
-          {value <= 2 ? 'Nice and relaxed' : value === 3 ? 'A good balance' : 'Ready for a challenge'}
-        </p>
       )}
     </div>
   );
