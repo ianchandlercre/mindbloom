@@ -2,73 +2,101 @@
 import { RecommendedGame } from '@/types';
 import Link from 'next/link';
 import {
-  BookOpen, Link2, Grid3X3, ListOrdered,
-  Puzzle, Calculator, HelpCircle, ArrowRight
+  Search, Map, Layers, ShoppingBag, Clock, Flower2,
+  BookOpen, Shuffle, Link2, Star,
 } from 'lucide-react';
 
 interface Props {
   game: RecommendedGame;
   rank: number;
+  isHighlighted?: boolean;
 }
 
-const GAME_ICONS: Record<string, React.ReactNode> = {
-  'word-scramble': <BookOpen className="w-7 h-7" />,
-  'word-connection': <Link2 className="w-7 h-7" />,
-  'memory-match': <Grid3X3 className="w-7 h-7" />,
-  'sequence-recall': <ListOrdered className="w-7 h-7" />,
-  'pattern-finder': <Puzzle className="w-7 h-7" />,
-  'number-crunch': <Calculator className="w-7 h-7" />,
-  'knowledge-quiz': <HelpCircle className="w-7 h-7" />,
-};
-
-const GAME_COLORS: Record<string, string> = {
-  'word-scramble': 'bg-forest-100 text-forest-700',
-  'word-connection': 'bg-sage-100 text-sage-700',
-  'memory-match': 'bg-amber-100 text-amber-800',
-  'sequence-recall': 'bg-wood-100 text-wood-700',
-  'pattern-finder': 'bg-forest-100 text-forest-700',
-  'number-crunch': 'bg-amber-100 text-amber-800',
-  'knowledge-quiz': 'bg-sage-100 text-sage-700',
+const GAME_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
+  'story-detective': Search,
+  'memory-journey': Map,
+  'word-weaver': Layers,
+  'number-flow': ShoppingBag,
+  'era-quiz': Clock,
+  'pattern-garden': Flower2,
+  'knowledge-quiz': BookOpen,
+  'word-scramble': Shuffle,
+  'word-connection': Link2,
 };
 
 const difficultyLabels = ['', 'Easy', 'Comfortable', 'Moderate', 'Challenging', 'Advanced'];
-const difficultyBadge = ['', 'badge-forest', 'badge-forest', 'badge-amber', 'badge-amber', 'badge-amber'];
+const difficultyColors = ['', 'text-sage-dark', 'text-sage-dark', 'text-amber-dark', 'text-amber-dark', 'text-red-500'];
 
-export default function GameCard({ game, rank }: Props) {
+export default function GameCard({ game, rank, isHighlighted }: Props) {
   const { config, matchScore, difficulty, reason } = game;
-  const icon = GAME_ICONS[config.id] || <Puzzle className="w-7 h-7" />;
-  const colorClass = GAME_COLORS[config.id] || 'bg-forest-100 text-forest-700';
+  const IconComponent = GAME_ICONS[config.id] || Star;
+
+  if (isHighlighted) {
+    // Large featured card for top recommendation
+    return (
+      <Link href={`/game/${config.id}?difficulty=${difficulty}`}>
+        <div className="bg-white rounded-warm-lg shadow-warm-md hover:shadow-warm-lg transition-all p-7 cursor-pointer border-2 border-soft-blue/20 hover:border-soft-blue/40 animate-slide-up">
+          <div className="flex items-start gap-5">
+            <div className="flex-shrink-0 w-14 h-14 bg-soft-blue/10 rounded-warm-lg flex items-center justify-center">
+              <IconComponent className="w-7 h-7 text-soft-blue" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between mb-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold text-soft-blue bg-soft-blue/10 px-2 py-0.5 rounded-full uppercase tracking-wide">
+                    Recommended
+                  </span>
+                  <span className="text-sm font-semibold text-soft-blue">
+                    {matchScore}% match
+                  </span>
+                </div>
+              </div>
+              <h3 className="text-heading font-bold text-warm-gray mb-2">{config.name}</h3>
+              <p className="text-body text-warm-gray-light mb-3">{config.description}</p>
+              <div className="flex items-center gap-3 flex-wrap">
+                <span className={`text-body font-medium ${difficultyColors[difficulty]}`}>
+                  {difficultyLabels[difficulty]}
+                </span>
+                <span className="text-warm-gray-light">·</span>
+                <span className="text-body text-warm-gray-light italic">{reason}</span>
+              </div>
+            </div>
+          </div>
+          <div className="mt-5 pt-4 border-t border-cream-dark">
+            <span className="text-body font-semibold text-soft-blue">Play now →</span>
+          </div>
+        </div>
+      </Link>
+    );
+  }
 
   return (
     <Link href={`/game/${config.id}?difficulty=${difficulty}`}>
       <div
-        className="lodge-card-hover p-5 flex items-center gap-4 group animate-slide-up"
+        className="bg-white rounded-warm-lg shadow-warm hover:shadow-warm-md transition-all p-5 cursor-pointer border-2 border-transparent hover:border-soft-blue/20 animate-slide-up"
         style={{ animationDelay: `${rank * 60}ms` }}
       >
-        {/* Icon */}
-        <div className={`w-14 h-14 rounded-lodge flex items-center justify-center flex-shrink-0 ${colorClass}`}>
-          {icon}
-        </div>
-
-        {/* Content */}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
-            <h3 className="text-body-lg font-semibold text-bark">{config.name}</h3>
-            <span className="text-xs font-semibold text-forest-600 bg-forest-50 px-2 py-0.5 rounded-full flex-shrink-0">
-              {matchScore}% match
-            </span>
+        <div className="flex items-start gap-4">
+          <div className="flex-shrink-0 w-11 h-11 bg-cream rounded-warm flex items-center justify-center">
+            <IconComponent className="w-5 h-5 text-warm-gray" />
           </div>
-          <p className="text-body text-bark-light mb-2">{config.shortDesc}</p>
-          <div className="flex items-center gap-3 flex-wrap">
-            <span className={difficultyBadge[difficulty]}>
-              {difficultyLabels[difficulty]}
-            </span>
-            <span className="text-sm text-bark-lighter italic">{reason}</span>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between mb-1">
+              <h3 className="text-body-lg font-bold text-warm-gray">{config.name}</h3>
+              <span className="text-sm font-semibold text-soft-blue bg-soft-blue/10 px-2 py-1 rounded-full flex-shrink-0 ml-2">
+                {matchScore}%
+              </span>
+            </div>
+            <p className="text-body text-warm-gray-light mb-2">{config.shortDesc}</p>
+            <div className="flex items-center gap-3 flex-wrap">
+              <span className={`text-sm font-medium ${difficultyColors[difficulty]}`}>
+                {difficultyLabels[difficulty]}
+              </span>
+              <span className="text-warm-gray-light text-sm">·</span>
+              <span className="text-sm text-warm-gray-light italic truncate">{reason}</span>
+            </div>
           </div>
         </div>
-
-        {/* Arrow */}
-        <ArrowRight className="w-5 h-5 text-bark-lighter flex-shrink-0 group-hover:text-forest-600 group-hover:translate-x-1 transition-all" />
       </div>
     </Link>
   );

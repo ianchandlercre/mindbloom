@@ -8,7 +8,6 @@ import { GameType } from '@/types';
  *
  * Returns AI-generated game content for the given game type and difficulty.
  * Falls back gracefully (returns empty rounds) if AI is unavailable.
- * The game components use static fallback data when rounds is empty.
  */
 export async function GET(request: NextRequest) {
   try {
@@ -27,7 +26,11 @@ export async function GET(request: NextRequest) {
     }
 
     const content = await generatePersonalizedContent(
-      { dimensions: profile.dimensions, interests: profile.interests },
+      {
+        dimensions: profile.dimensions,
+        interests: profile.interests,
+        preferredEra: (profile as any).preferredEra,
+      },
       gameType,
       difficulty
     );
@@ -35,7 +38,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(content);
   } catch (e) {
     console.error('Content API error:', e);
-    // Always return valid response so game can fall back to static content
     return NextResponse.json({ rounds: [], theme: 'general' });
   }
 }

@@ -18,7 +18,9 @@ async function ensureInitialized(): Promise<void> {
       user_id INTEGER PRIMARY KEY REFERENCES users(id),
       dimensions TEXT NOT NULL DEFAULT '{"verbal":50,"logical":50,"spatial":50,"memory":50}',
       interests TEXT NOT NULL DEFAULT '[]',
-      difficulty_level INTEGER NOT NULL DEFAULT 2
+      difficulty_level INTEGER NOT NULL DEFAULT 2,
+      preferred_era TEXT,
+      session_length TEXT DEFAULT 'medium'
     )
   `;
   await sql`
@@ -67,6 +69,38 @@ async function ensureInitialized(): Promise<void> {
       created_at TIMESTAMPTZ DEFAULT NOW()
     )
   `;
+  await sql`
+    CREATE TABLE IF NOT EXISTS generated_images (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER REFERENCES users(id),
+      image_url TEXT NOT NULL,
+      prompt TEXT NOT NULL,
+      theme TEXT NOT NULL,
+      purpose TEXT NOT NULL DEFAULT 'dashboard',
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    )
+  `;
+  await sql`
+    CREATE TABLE IF NOT EXISTS ai_themes (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER REFERENCES users(id),
+      primary_color TEXT NOT NULL,
+      accent_color TEXT NOT NULL,
+      bg_color TEXT,
+      greeting TEXT,
+      description TEXT,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    )
+  `;
+
+  // Add new columns to profiles if they don't exist (migration)
+  try {
+    await sql`ALTER TABLE profiles ADD COLUMN IF NOT EXISTS preferred_era TEXT`;
+    await sql`ALTER TABLE profiles ADD COLUMN IF NOT EXISTS session_length TEXT DEFAULT 'medium'`;
+  } catch {
+    // Columns may already exist
+  }
+
   initialized = true;
 }
 
@@ -113,14 +147,27 @@ export async function getProfile(userId: number) {
     dimensions: JSON.parse(row.dimensions),
     interests: JSON.parse(row.interests),
     difficultyLevel: row.difficulty_level,
+    preferredEra: row.preferred_era || null,
+    sessionLength: row.session_length || 'medium',
   };
 }
 
-export async function updateProfile(userId: number, dimensions: any, interests: string[], difficultyLevel?: number) {
+export async function updateProfile(
+  userId: number,
+  dimensions: any,
+  interests: string[],
+  difficultyLevel?: number,
+  extras?: { preferredEra?: string; sessionLength?: string }
+) {
   await ensureInitialized();
   if (difficultyLevel !== undefined) {
     await sql`
-      UPDATE profiles SET dimensions = ${JSON.stringify(dimensions)}, interests = ${JSON.stringify(interests)}, difficulty_level = ${difficultyLevel}
+      UPDATE profiles SET
+        dimensions = ${JSON.stringify(dimensions)},
+        interests = ${JSON.stringify(interests)},
+        difficulty_level = ${difficultyLevel},
+        preferred_era = ${extras?.preferredEra || null},
+        session_length = ${extras?.sessionLength || 'medium'}
       WHERE user_id = ${userId}
     `;
   } else {
@@ -223,7 +270,7 @@ export async function getSurveyResponses(userId: number) {
 export async function hasSurveyCompleted(userId: number): Promise<boolean> {
   await ensureInitialized();
   const { rows } = await sql`SELECT COUNT(*) as count FROM survey_responses WHERE user_id = ${userId}`;
-  return parseInt(rows[0]?.count || '0') >= 10;
+  return parseInt(rows[0]?.count || '0') >= 4; // New survey has 6 questions, need at least 4
 }
 
 // ===== AI Operations =====
@@ -277,12 +324,11 @@ export async function trackAIUsage(
   purpose: string
 ) {
   await ensureInitialized();
-  // Approximate cost in USD (based on current pricing)
   const costUsd = model.includes('haiku')
     ? (inputTokens * 0.0000008) + (outputTokens * 0.000004)
     : model.includes('sonnet')
     ? (inputTokens * 0.000003) + (outputTokens * 0.000015)
-    : 0; // Gemini is effectively free at this scale
+    : 0;
 
   await sql`
     INSERT INTO ai_usage (user_id, model, input_tokens, output_tokens, cost_usd, purpose)
@@ -305,4 +351,63 @@ export async function getUserSessionCount(userId: number): Promise<number> {
   await ensureInitialized();
   const { rows } = await sql`SELECT COUNT(*) as count FROM game_sessions WHERE user_id = ${userId}`;
   return parseInt(rows[0]?.count || '0');
+}
+
+// ===== Image Operations =====
+
+export async function saveGeneratedImage(
+  userId: number | null,
+  imageUrl: string,
+  prompt: string,
+  theme: string,
+  purpose = 'dashboard'
+) {
+  await ensureInitialized();
+  const { rows } = await sql`
+    INSERT INTO generated_images (user_id, image_url, prompt, theme, purpose)
+    VALUES (${userId}, ${imageUrl}, ${prompt}, ${theme}, ${purpose})
+    RETURNING id
+  `;
+  return rows[0].id;
+}
+
+export async function getLatestUserImage(userId: number, purpose = 'dashboard') {
+  await ensureInitialized();
+  const { rows } = await sql`
+    SELECT * FROM generated_images WHERE user_id = ${userId} AND purpose = ${purpose}
+    ORDER BY created_at DESC LIMIT 1
+  `;
+  return rows[0] || null;
+}
+
+// ===== Theme Operations =====
+
+export async function saveAITheme(userId: number, theme: {
+  primaryColor: string;
+  accentColor: string;
+  bgColor?: string;
+  greeting?: string;
+  description?: string;
+}) {
+  await ensureInitialized();
+  await sql`
+    INSERT INTO ai_themes (user_id, primary_color, accent_color, bg_color, greeting, description)
+    VALUES (${userId}, ${theme.primaryColor}, ${theme.accentColor}, ${theme.bgColor || null}, ${theme.greeting || null}, ${theme.description || null})
+  `;
+}
+
+export async function getLatestAITheme(userId: number) {
+  await ensureInitialized();
+  const { rows } = await sql`
+    SELECT * FROM ai_themes WHERE user_id = ${userId} ORDER BY created_at DESC LIMIT 1
+  `;
+  if (rows.length === 0) return null;
+  const row = rows[0];
+  return {
+    primaryColor: row.primary_color,
+    accentColor: row.accent_color,
+    bgColor: row.bg_color,
+    greeting: row.greeting,
+    description: row.description,
+  };
 }

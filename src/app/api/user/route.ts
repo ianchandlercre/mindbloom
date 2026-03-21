@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getProfile, getSessionStats, getGameSessions, getLatestAIAnalysis } from '@/lib/db';
 import { getRecommendedGames } from '@/lib/adaptive-engine';
+import { generateBrainTodayCard } from '@/lib/ai-service';
 import { RecommendedGame } from '@/types';
 
 export async function GET(request: NextRequest) {
@@ -24,7 +25,6 @@ export async function GET(request: NextRequest) {
         getLatestAIAnalysis(userId),
       ]);
 
-      // Get base deterministic recommendations
       const baseRecs = getRecommendedGames(
         profile.dimensions,
         profile.interests,
@@ -32,7 +32,6 @@ export async function GET(request: NextRequest) {
         profile.difficultyLevel
       );
 
-      // Merge AI priority boosts if available
       let recommendations: RecommendedGame[] = baseRecs;
       if (aiAnalysis && aiAnalysis.gameRecommendations?.length > 0) {
         const boostMap = new Map<string, { reason: string; priorityBoost: number }>();
@@ -57,6 +56,26 @@ export async function GET(request: NextRequest) {
         aiEncouragement: aiAnalysis?.encouragement || null,
         lastSessionSummary: aiAnalysis?.sessionSummary || null,
       });
+    }
+
+    if (action === 'brain-today') {
+      const sessions = await getGameSessions(userId, 7);
+      if (sessions.length === 0) {
+        return NextResponse.json({ brainToday: null });
+      }
+      const recentSessions = sessions.map((s: any) => ({
+        gameType: s.game_type || s.gameType,
+        accuracy: s.accuracy,
+        duration: s.duration,
+        score: s.score,
+        createdAt: s.created_at || s.createdAt,
+      }));
+      const brainToday = await generateBrainTodayCard({
+        userId,
+        recentSessions,
+        profile: { interests: profile.interests, dimensions: profile.dimensions },
+      });
+      return NextResponse.json({ brainToday });
     }
 
     const stats = await getSessionStats(userId);

@@ -1,337 +1,253 @@
 'use client';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import {
-  Brain,
-  BookOpen,
-  Layers,
-  GitBranch,
-  Calculator,
-  Compass,
-  Clock,
-  Shuffle,
-  TrendingUp,
-  Flame,
-  BarChart2,
-  ClipboardList,
-  Leaf,
-  LogOut,
-  ChevronRight,
-  Sparkles,
-} from 'lucide-react';
 import { useUser } from '@/hooks/useUser';
 import { useAdaptive } from '@/hooks/useAdaptive';
-
-// ===== Game card definitions =====
-const GAMES = [
-  {
-    id: 'knowledge-quiz',
-    name: 'Story Detective',
-    description: 'Answer trivia questions drawn from history, culture, and everyday knowledge.',
-    icon: BookOpen,
-    color: 'forest',
-    difficulty: 'Gentle',
-  },
-  {
-    id: 'memory-match',
-    name: 'Memory Journey',
-    description: 'Flip cards and match pairs — a classic exercise for your recall.',
-    icon: Layers,
-    color: 'amber',
-    difficulty: 'Moderate',
-  },
-  {
-    id: 'word-connection',
-    name: 'Word Weaver',
-    description: 'Connect words by meaning, category, or association.',
-    icon: GitBranch,
-    color: 'sage',
-    difficulty: 'Gentle',
-  },
-  {
-    id: 'number-crunch',
-    name: 'Number Flow',
-    description: 'Solve simple math problems and keep your numerical thinking sharp.',
-    icon: Calculator,
-    color: 'wood',
-    difficulty: 'Moderate',
-  },
-  {
-    id: 'pattern-finder',
-    name: 'Map Explorer',
-    description: 'Spot the pattern in a sequence and discover what comes next.',
-    icon: Compass,
-    color: 'forest',
-    difficulty: 'Moderate',
-  },
-  {
-    id: 'sequence-recall',
-    name: 'Era Quiz',
-    description: 'Remember and recall historical sequences, timelines, and events.',
-    icon: Clock,
-    color: 'amber',
-    difficulty: 'Challenging',
-  },
-  {
-    id: 'word-scramble',
-    name: 'Pattern Garden',
-    description: 'Unscramble letters and tend your vocabulary, one word at a time.',
-    icon: Shuffle,
-    color: 'sage',
-    difficulty: 'Gentle',
-  },
-] as const;
-
-const DIFFICULTY_BADGE: Record<string, string> = {
-  Gentle: 'badge-forest',
-  Moderate: 'badge-amber',
-  Challenging: 'badge-wood',
-};
-
-const ICON_CLASS: Record<string, string> = {
-  forest: 'bg-forest-100 text-forest-600',
-  amber:  'bg-amber-100 text-amber-700',
-  sage:   'bg-sage-100 text-sage-600',
-  wood:   'bg-wood-100 text-wood-600',
-};
+import { getActiveGameConfigs } from '@/lib/game-data';
+import GameCard from '@/components/dashboard/GameCard';
+import { LogOut, User, Brain, ChevronRight, Activity } from 'lucide-react';
 
 function getTimeGreeting(name: string): string {
-  const h = new Date().getHours();
-  if (h < 12) return `Good morning, ${name}`;
-  if (h < 17) return `Good afternoon, ${name}`;
+  const hour = new Date().getHours();
+  if (hour < 12) return `Good morning, ${name}`;
+  if (hour < 17) return `Good afternoon, ${name}`;
   return `Good evening, ${name}`;
 }
 
 export default function DashboardPage() {
   const router = useRouter();
   const { user, profile, loading: userLoading, logout } = useUser();
-  const { stats, aiInsights, aiEncouragement, loading: dataLoading } = useAdaptive(user?.id, profile);
+  const { recommendations, stats, aiInsights, aiEncouragement, lastSessionSummary, loading: dataLoading } = useAdaptive(user?.id, profile);
+  const [heroImage, setHeroImage] = useState<string | null>(null);
+  const [brainToday, setBrainToday] = useState<{ headline: string; body: string } | null>(null);
 
   useEffect(() => {
     if (!userLoading && !user) router.push('/');
   }, [user, userLoading, router]);
 
+  // Load hero image and brain-today card
+  useEffect(() => {
+    if (!user?.id) return;
+    // Try to load a generated hero image
+    fetch(`/api/images?userId=${user.id}&purpose=dashboard`)
+      .then(r => r.json())
+      .then(d => { if (d.imageUrl) setHeroImage(d.imageUrl); })
+      .catch(() => {});
+    // Load brain today card
+    fetch(`/api/user?userId=${user.id}&action=brain-today`)
+      .then(r => r.json())
+      .then(d => { if (d.brainToday) setBrainToday(d.brainToday); })
+      .catch(() => {});
+  }, [user?.id]);
+
   if (userLoading || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-cream">
-        <div className="text-center animate-gentle-pulse">
-          <Brain className="w-16 h-16 text-forest-600 mx-auto mb-4" />
-          <p className="text-body-lg text-bark-light">Loading your garden...</p>
+        <div className="text-center">
+          <div className="w-12 h-12 border-2 border-soft-blue border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-body-lg text-warm-gray-light">Loading your profile...</p>
         </div>
       </div>
     );
   }
 
   const greeting = getTimeGreeting(user.name);
-  const insight = aiEncouragement || aiInsights
-    || 'Every day you practice, you are investing in the health of your mind. You are doing great.';
+  const topGame = recommendations[0] || null;
+  const otherGames = recommendations.slice(1);
+  const allGames = getActiveGameConfigs();
+
+  // Determine theme color from profile (simple fallback)
+  const themeColor = '#2D6A4F'; // forest green default
 
   return (
     <div className="min-h-screen bg-cream">
-
       {/* Header */}
-      <header
-        className="sticky top-0 z-10 border-b border-cream-300"
-        style={{ background: 'rgba(250, 247, 240, 0.95)', backdropFilter: 'blur(8px)' }}
-      >
-        <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
+      <header className="sticky top-0 bg-cream/95 backdrop-blur-sm border-b border-cream-dark z-10">
+        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Brain className="w-7 h-7 text-forest-600" />
-            <span
-              className="text-heading-sm text-bark font-bold"
-              style={{ fontFamily: '"Palatino Linotype", Palatino, Georgia, serif' }}
-            >
-              MindBloom
-            </span>
+            <div className="w-8 h-8 bg-soft-blue rounded-warm flex items-center justify-center">
+              <Brain className="w-5 h-5 text-white" />
+            </div>
+            <span className="text-body font-bold text-warm-gray">MindBloom</span>
           </div>
-          <nav className="flex items-center gap-6">
-            <Link
-              href="/profile"
-              className="text-body text-forest-700 hover:text-forest-900 font-medium transition-colors"
-            >
-              My Profile
+          <div className="flex items-center gap-4">
+            <Link href="/profile" className="flex items-center gap-1.5 text-body text-soft-blue hover:text-soft-blue-dark transition-colors font-medium">
+              <User className="w-4 h-4" />
+              <span className="hidden sm:inline">Profile</span>
             </Link>
             <button
               onClick={() => { logout(); router.push('/'); }}
-              className="flex items-center gap-2 text-body text-bark-lighter hover:text-bark transition-colors"
+              className="flex items-center gap-1.5 text-body text-warm-gray-light hover:text-warm-gray transition-colors"
             >
-              <LogOut className="w-5 h-5" aria-hidden="true" />
-              Sign Out
+              <LogOut className="w-4 h-4" />
+              <span className="hidden sm:inline">Sign Out</span>
             </button>
-          </nav>
+          </div>
         </div>
       </header>
 
-      <main className="max-w-5xl mx-auto px-4 py-8 space-y-8">
+      <main className="max-w-4xl mx-auto px-4 py-8">
 
-        {/* ── Greeting ── */}
-        <section className="animate-fade-in">
-          <h1 className="text-heading-lg text-bark mb-2">{greeting}</h1>
-          {stats && stats.streak > 0 ? (
-            <div className="flex items-center gap-2 text-body-lg text-amber-700">
-              <Flame className="w-6 h-6" aria-hidden="true" />
-              <span>{stats.streak}-day streak — keep the momentum going!</span>
-            </div>
+        {/* Hero Section */}
+        <div className="relative rounded-warm-lg overflow-hidden mb-8 animate-fade-in">
+          {/* Background — image or gradient */}
+          {heroImage ? (
+            <div
+              className="absolute inset-0 bg-cover bg-center"
+              style={{ backgroundImage: `url(${heroImage})` }}
+            />
           ) : (
-            <p className="text-body-lg text-bark-light">
-              Ready to exercise your mind? Choose a game below to begin.
-            </p>
+            <div
+              className="absolute inset-0"
+              style={{ background: `linear-gradient(135deg, #1E3A5F 0%, #2D6A4F 50%, #744210 100%)` }}
+            />
           )}
-        </section>
+          {/* Overlay */}
+          <div className="absolute inset-0 bg-black/40" />
 
-        {/* ── Your Brain Today ── */}
-        <section className="animate-slide-up">
-          <div
-            className="lodge-card p-7"
-            style={{
-              background: 'linear-gradient(135deg, #f0f7f0 0%, #faf7f0 60%, #fdf4d6 100%)',
-              borderLeft: '4px solid #3d8b3d',
-            }}
-          >
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 bg-forest-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                <Sparkles className="w-6 h-6 text-forest-600" aria-hidden="true" />
+          {/* Content */}
+          <div className="relative px-8 py-10">
+            <h1 className="text-heading-lg font-bold text-white mb-2 drop-shadow">{greeting}</h1>
+            {stats && stats.streak > 0 && (
+              <p className="text-body-lg text-white/80 mb-4">
+                {stats.streak} day streak — wonderful consistency.
+              </p>
+            )}
+            {stats && stats.totalSessions > 0 && (
+              <div className="flex items-center gap-6">
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-white">{stats.totalSessions}</p>
+                  <p className="text-sm text-white/70">sessions</p>
+                </div>
+                <div className="w-px h-8 bg-white/30" />
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-white">{stats.averageAccuracy}%</p>
+                  <p className="text-sm text-white/70">avg accuracy</p>
+                </div>
+                {stats.streak > 0 && (
+                  <>
+                    <div className="w-px h-8 bg-white/30" />
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-white">{stats.streak}</p>
+                      <p className="text-sm text-white/70">day streak</p>
+                    </div>
+                  </>
+                )}
               </div>
-              <div>
-                <h2 className="text-heading-sm text-bark mb-2">Your Brain Today</h2>
-                <p className="text-body-lg text-bark-light leading-relaxed">
-                  {dataLoading ? 'Gathering your insights...' : insight}
-                </p>
+            )}
+            {(!stats || stats.totalSessions === 0) && (
+              <p className="text-body-lg text-white/80">
+                Ready to exercise your mind? Your first game is waiting below.
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* Complete Profile Banner */}
+        {profile && profile.interests.length === 0 && (
+          <Link href="/survey">
+            <div className="mb-8 p-6 bg-amber/15 border-2 border-amber/40 rounded-warm-lg cursor-pointer hover:bg-amber/25 transition-colors animate-slide-up">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-body-lg font-semibold text-warm-gray mb-1">Personalise Your Experience</p>
+                  <p className="text-body text-warm-gray-light">Take a quick survey so we can choose games and topics you will genuinely enjoy.</p>
+                </div>
+                <ChevronRight className="w-6 h-6 text-warm-gray-light flex-shrink-0 ml-4" />
               </div>
             </div>
-          </div>
-        </section>
-
-        {/* ── Profile Banner ── */}
-        {profile && profile.interests.length === 0 && (
-          <section>
-            <Link href="/survey">
-              <div className="lodge-card p-6 border-2 border-amber-300 bg-amber-50 hover:shadow-lodge-md transition-all duration-200 cursor-pointer animate-fade-in">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-amber-100 rounded-lodge flex items-center justify-center flex-shrink-0">
-                    <ClipboardList className="w-6 h-6 text-amber-700" aria-hidden="true" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-heading-sm text-bark">Personalize Your Experience</p>
-                    <p className="text-body text-bark-light mt-1">
-                      Take a 5-minute survey so we can tailor your games and suggestions.
-                    </p>
-                  </div>
-                  <ChevronRight className="w-6 h-6 text-bark-lighter flex-shrink-0" aria-hidden="true" />
-                </div>
-              </div>
-            </Link>
-          </section>
+          </Link>
         )}
 
-        {/* ── Brain Games ── */}
-        <section>
-          <h2 className="text-heading text-bark mb-5">Brain Games</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {GAMES.map(game => {
-              const Icon = game.icon;
-              return (
-                <Link key={game.id} href={`/game/${game.id}`}>
-                  <div
-                    className="lodge-card-hover p-6 flex flex-col h-full cursor-pointer"
-                    style={{ minHeight: '190px' }}
-                  >
-                    <div className="flex items-start justify-between mb-4">
-                      <div className={`w-12 h-12 rounded-lodge flex items-center justify-center ${ICON_CLASS[game.color]}`}>
-                        <Icon className="w-6 h-6" aria-hidden="true" />
-                      </div>
-                      <span className={DIFFICULTY_BADGE[game.difficulty]}>
-                        {game.difficulty}
-                      </span>
-                    </div>
-                    <h3 className="text-heading-sm text-bark mb-2">{game.name}</h3>
-                    <p className="text-body text-bark-light flex-1 leading-relaxed">
-                      {game.description}
-                    </p>
-                    <div className="mt-4 flex items-center gap-2 text-body font-semibold text-forest-600">
-                      <Leaf className="w-4 h-4" aria-hidden="true" />
-                      <span>Play now</span>
-                    </div>
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        </section>
-
-        {/* ── Weekly Brain Report ── */}
-        <section>
-          <h2 className="text-heading text-bark mb-5">Weekly Brain Report</h2>
-
-          {dataLoading ? (
-            <div className="lodge-card p-7 animate-gentle-pulse">
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
-                {[1,2,3,4].map(i => (
-                  <div key={i} className="text-center space-y-3">
-                    <div className="w-12 h-12 bg-cream-300 rounded-full mx-auto" />
-                    <div className="h-7 bg-cream-300 rounded w-12 mx-auto" />
-                    <div className="h-4 bg-cream-300 rounded w-20 mx-auto" />
-                  </div>
-                ))}
-              </div>
+        {/* Your Brain Today */}
+        {(brainToday || aiEncouragement || lastSessionSummary) && (
+          <div className="mb-8 animate-slide-up">
+            <div className="flex items-center gap-2 mb-3">
+              <Activity className="w-5 h-5 text-soft-blue" />
+              <h2 className="text-heading font-bold text-warm-gray">Your Brain Today</h2>
             </div>
-          ) : stats ? (
-            <div className="lodge-card p-7">
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
-                <div className="text-center">
-                  <div className="w-12 h-12 bg-forest-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <BarChart2 className="w-6 h-6 text-forest-600" aria-hidden="true" />
-                  </div>
-                  <p className="text-heading text-bark font-bold">{stats.totalSessions ?? 0}</p>
-                  <p className="text-body text-bark-light">Games Played</p>
-                </div>
-                <div className="text-center">
-                  <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <Flame className="w-6 h-6 text-amber-600" aria-hidden="true" />
-                  </div>
-                  <p className="text-heading text-bark font-bold">{stats.streak ?? 0}</p>
-                  <p className="text-body text-bark-light">Day Streak</p>
-                </div>
-                <div className="text-center">
-                  <div className="w-12 h-12 bg-sage-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <TrendingUp className="w-6 h-6 text-sage-600" aria-hidden="true" />
-                  </div>
-                  <p className="text-heading text-bark font-bold">{stats.averageAccuracy ?? 0}%</p>
-                  <p className="text-body text-bark-light">Avg. Accuracy</p>
-                </div>
-                <div className="text-center">
-                  <div className="w-12 h-12 bg-wood-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <Brain className="w-6 h-6 text-wood-600" aria-hidden="true" />
-                  </div>
-                  <p className="text-heading text-bark font-bold">{stats.totalScore ?? 0}</p>
-                  <p className="text-body text-bark-light">Total Score</p>
-                </div>
-              </div>
-
-              {(!stats.totalSessions || stats.totalSessions === 0) && (
-                <div className="mt-6 pt-6 border-t border-cream-300 text-center">
-                  <p className="text-body text-bark-light">
-                    Play your first game to start building your report.
-                  </p>
-                </div>
+            <div className="bg-white rounded-warm-lg shadow-warm-md p-6 border-l-4 border-soft-blue">
+              {brainToday ? (
+                <>
+                  <p className="text-body-lg font-semibold text-warm-gray mb-2">{brainToday.headline}</p>
+                  <p className="text-body text-warm-gray-light">{brainToday.body}</p>
+                </>
+              ) : (
+                <>
+                  {lastSessionSummary && (
+                    <p className="text-body text-warm-gray mb-2">{lastSessionSummary}</p>
+                  )}
+                  {aiEncouragement && (
+                    <p className="text-body text-warm-gray-light italic">{aiEncouragement}</p>
+                  )}
+                </>
+              )}
+              {aiInsights && aiInsights !== aiEncouragement && (
+                <p className="text-body text-warm-gray-light mt-2 pt-2 border-t border-cream-dark">{aiInsights}</p>
               )}
             </div>
-          ) : (
-            <div className="lodge-card p-8 text-center">
-              <Brain className="w-12 h-12 text-forest-300 mx-auto mb-4" aria-hidden="true" />
-              <p className="text-body-lg text-bark-light">
-                Play a few games to see your progress here.
-              </p>
-            </div>
-          )}
-        </section>
+          </div>
+        )}
+
+        {/* Top recommended game */}
+        {dataLoading ? (
+          <div className="space-y-4 mb-8">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="bg-white rounded-warm-lg shadow-warm p-6 animate-pulse">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-cream-dark rounded-warm" />
+                  <div className="flex-1">
+                    <div className="h-5 bg-cream-dark rounded w-1/3 mb-3" />
+                    <div className="h-4 bg-cream-dark rounded w-2/3" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <>
+            {topGame && (
+              <div className="mb-6">
+                <GameCard game={topGame} rank={0} isHighlighted={true} />
+              </div>
+            )}
+
+            {/* Other recommendations */}
+            {otherGames.length > 0 && (
+              <div className="mb-8">
+                <h2 className="text-heading font-bold text-warm-gray mb-4">More For You</h2>
+                <div className="space-y-3">
+                  {otherGames.map((game, i) => (
+                    <GameCard key={game.config.id} game={game} rank={i + 1} />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* All games grid (if no recommendations yet) */}
+            {recommendations.length === 0 && (
+              <div className="mb-8">
+                <h2 className="text-heading font-bold text-warm-gray mb-4">Brain Games</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {allGames.map((config) => (
+                    <Link key={config.id} href={`/game/${config.id}?difficulty=2`}>
+                      <div className="bg-white rounded-warm-lg shadow-warm p-5 hover:shadow-warm-md transition-all border-2 border-transparent hover:border-soft-blue/20">
+                        <h3 className="text-body-lg font-bold text-warm-gray mb-1">{config.name}</h3>
+                        <p className="text-body text-warm-gray-light">{config.shortDesc}</p>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+          </>
+        )}
 
         {/* Retake survey */}
         {profile && profile.interests.length > 0 && (
-          <div className="text-center pb-6">
-            <Link href="/survey" className="text-body text-forest-600 hover:text-forest-800 transition-colors">
-              Retake the preference survey
+          <div className="mt-8 text-center">
+            <Link href="/survey" className="text-body text-warm-gray-light hover:text-warm-gray transition-colors">
+              Retake the preferences survey
             </Link>
           </div>
         )}
