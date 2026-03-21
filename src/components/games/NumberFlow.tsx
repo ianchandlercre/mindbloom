@@ -51,7 +51,7 @@ export default function NumberFlow({
   }, [selected, current, onAnswer]);
 
   const handleNext = useCallback(() => {
-    if (currentRound >= totalRounds) {
+    if (currentRound > totalRounds) {
       onComplete();
     } else {
       setSelected(null);
@@ -152,7 +152,7 @@ export default function NumberFlow({
           onClick={handleNext}
           className="w-full py-5 bg-sage text-white rounded-warm text-body-lg font-semibold hover:bg-sage-dark transition-colors shadow-warm"
         >
-          {currentRound >= totalRounds ? 'See Results' : 'Next Question'}
+          {currentRound > totalRounds ? 'See Results' : 'Next Question'}
         </button>
       )}
     </div>

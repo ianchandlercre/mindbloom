@@ -28,7 +28,7 @@ export default function WordConnection({ difficulty, interests, onAnswer, onComp
     }
   }, [difficulty, interests, totalRounds, initialRounds]);
 
-  const round = rounds[currentRound];
+  const round = rounds[currentRound - 1];
 
   const handleSelect = (index: number) => {
     if (feedback || !round) return;
@@ -42,7 +42,7 @@ export default function WordConnection({ difficulty, interests, onAnswer, onComp
 
     setTimeout(() => {
       setFeedback(null);
-      if (currentRound + 1 >= totalRounds) {
+      if (currentRound >= totalRounds) {
         onComplete();
       }
     }, 1800);
@@ -65,11 +65,11 @@ export default function WordConnection({ difficulty, interests, onAnswer, onComp
   return (
     <div className="animate-fade-in">
       <div className="flex justify-between items-center mb-6">
-        <span className="text-body text-warm-gray-light">Round {currentRound + 1} of {totalRounds}</span>
+        <span className="text-body text-warm-gray-light">Round {currentRound} of {totalRounds}</span>
         <span className="text-body font-semibold text-soft-blue">Score: {score}</span>
       </div>
       <div className="w-full bg-cream-dark rounded-full h-3 mb-8">
-        <div className="bg-soft-blue rounded-full h-3 transition-all duration-500" style={{ width: `${(currentRound / totalRounds) * 100}%` }} />
+        <div className="bg-soft-blue rounded-full h-3 transition-all duration-500" style={{ width: `${((currentRound - 1) / totalRounds) * 100}%` }} />
       </div>
 
       <div className="text-center mb-8">

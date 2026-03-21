@@ -29,6 +29,7 @@ export default function WordWeaver({
   currentRound, totalRounds, score, isComplete, initialRounds,
 }: Props) {
   const [puzzles, setPuzzles] = useState<WordWeaverPuzzle[]>([]);
+  const [puzzleIndex, setPuzzleIndex] = useState(0);
   const [words, setWords] = useState<string[]>([]);
   const [selected, setSelected] = useState<string[]>([]);
   const [foundGroups, setFoundGroups] = useState<Array<{ label: string; words: string[]; color: GroupColor }>>([]);
@@ -51,7 +52,7 @@ export default function WordWeaver({
     setPuzzles(shuffled.slice(0, totalRounds));
   }, [initialRounds, totalRounds]);
 
-  const currentPuzzle = puzzles[currentRound - 1];
+  const currentPuzzle = puzzles[puzzleIndex];
 
   // Set up words when puzzle changes
   useEffect(() => {
@@ -92,11 +93,12 @@ export default function WordWeaver({
 
       if (newFoundGroups.length === currentPuzzle.groups.length) {
         setTimeout(() => {
-          if (currentRound >= totalRounds) {
+          if (currentRound > totalRounds) {
             onComplete();
           } else {
-            // trigger next round
-            onAnswer(false, 0);
+            // advance to next puzzle
+            setPuzzleIndex(prev => prev + 1);
+            setFoundGroups([]);
           }
         }, 1200);
       }
@@ -104,12 +106,11 @@ export default function WordWeaver({
       setMistakes(prev => prev + 1);
       setMessage("Not quite — try a different combination.");
       setMessageType('bad');
-      onAnswer(false, 0);
       setSelected([]);
     }
 
     setTimeout(() => setMessage(''), 2000);
-  }, [currentPuzzle, selected, foundGroups, onAnswer, currentRound, totalRounds, onComplete]);
+  }, [currentPuzzle, selected, foundGroups, onAnswer, currentRound, totalRounds, onComplete, setPuzzleIndex]);
 
   const handleClear = useCallback(() => setSelected([]), []);
 

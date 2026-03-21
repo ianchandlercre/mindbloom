@@ -261,4 +261,40 @@
   .text-amber-dark {
     color: #a95c15;
   }
+  .bg-sage {
+    background-color: var(--color-sage);
+  }
+  .text-sage {
+    color: var(--color-sage);
+  }
+  .text-sage-dark {
+    color: #496a49;
+  }
+  .bg-sage-dark {
+    background-color: #496a49;
+  }
+  .hover\:bg-sage-dark:hover {
+    background-color: #496a49;
+  }
+  .shadow-warm-lg {
+    box-shadow: 0 8px 40px rgba(61, 48, 40, 0.14);
+  }
+  .hover\:text-soft-blue-dark:hover {
+    color: var(--color-forest-dark);
+  }
+  .border-soft-blue-light {
+    border-color: var(--color-forest-light);
+  }
+  .text-soft-blue-dark {
+    color: var(--color-forest-dark);
+  }
+  .bg-amber {
+    background-color: var(--color-amber);
+  }
+  .text-amber {
+    color: var(--color-amber);
+  }
+  .hover\:bg-amber-dark:hover {
+    background-color: #cc7d16;
+  }
 }

@@ -55,7 +55,7 @@ export default function EraQuiz({
   }, [selected, current, onAnswer]);
 
   const handleNext = useCallback(() => {
-    if (currentRound >= totalRounds) {
+    if (currentRound > totalRounds) {
       onComplete();
     } else {
       setSelected(null);
@@ -169,7 +169,7 @@ export default function EraQuiz({
           onClick={handleNext}
           className="w-full py-5 bg-soft-blue text-white rounded-warm text-body-lg font-semibold hover:bg-soft-blue-dark transition-colors shadow-warm"
         >
-          {currentRound >= totalRounds ? 'See Results' : 'Next Question'}
+          {currentRound > totalRounds ? 'See Results' : 'Next Question'}
         </button>
       )}
     </div>

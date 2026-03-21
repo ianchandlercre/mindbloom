@@ -86,16 +86,14 @@ export default function StoryDetective({
   }, [currentPassage, selectedSentences, onAnswer]);
 
   const handleNextPassage = useCallback(() => {
-    if (currentRound >= totalRounds) {
+    if (currentRound > totalRounds) {
       onComplete();
     } else {
       setPhase('reading');
       setSelectedSentences([]);
       setRevealed(false);
-      // Parent increments currentRound
-      onAnswer(false, 0); // signal round transition without double-scoring
     }
-  }, [currentRound, totalRounds, onComplete, onAnswer]);
+  }, [currentRound, totalRounds, onComplete]);
 
   const handleReadyToSelect = useCallback(() => {
     setPhase('selecting');
@@ -227,7 +225,7 @@ export default function StoryDetective({
           onClick={handleNextPassage}
           className="w-full py-5 bg-sage text-white rounded-warm text-body-lg font-semibold hover:bg-sage-dark transition-colors shadow-warm"
         >
-          {currentRound >= totalRounds ? 'See Results' : 'Next Passage'}
+          {currentRound > totalRounds ? 'See Results' : 'Next Passage'}
         </button>
       )}
     </div>
