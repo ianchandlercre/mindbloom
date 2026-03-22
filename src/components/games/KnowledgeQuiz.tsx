@@ -19,7 +19,7 @@ interface Props {
 
 export default function KnowledgeQuiz({ difficulty, interests, onAnswer, onComplete, currentRound, totalRounds, score, isComplete, initialRounds }: Props) {
   const [rounds, setRounds] = useState<KnowledgeQuizRound[]>([]);
-  const [feedback, setFeedback] = useState<{ correct: boolean; message: string; funFact: string } | null>(null);
+  const [feedback, setFeedback] = useState<{ correct: boolean; message: string; funFact: string; selectedIndex: number } | null>(null);
 
   useEffect(() => {
     if (initialRounds && initialRounds.length > 0) {
@@ -36,7 +36,7 @@ export default function KnowledgeQuiz({ difficulty, interests, onAnswer, onCompl
     const isCorrect = index === round.correctIndex;
     const message = isCorrect ? 'That\'s right!' : `The answer is: ${round.options[round.correctIndex]}`;
 
-    setFeedback({ correct: isCorrect, message, funFact: round.funFact });
+    setFeedback({ correct: isCorrect, message, funFact: round.funFact, selectedIndex: index });
     onAnswer(isCorrect);
 
     setTimeout(() => {
@@ -82,20 +82,26 @@ export default function KnowledgeQuiz({ difficulty, interests, onAnswer, onCompl
 
       <div key={currentRound} className="grid grid-cols-1 gap-3 max-w-lg mx-auto mt-6">
         {round.options.map((option, i) => {
-          const isCorrect = !!feedback && i === round.correctIndex;
-          const isWrong = !!feedback && !feedback.correct && i !== round.correctIndex;
-          const btnClass = feedback
-            ? isCorrect
-              ? 'bg-green-50 border-2 border-green-500 text-green-800'
-              : 'bg-white border-2 border-cream-dark text-warm-gray-light opacity-50'
-            : 'bg-white border-2 border-cream-dark hover:border-soft-blue text-warm-gray';
+          let btnClass = 'bg-white border-2 border-cream-dark hover:border-soft-blue text-warm-gray';
+          let animClass = '';
+          if (feedback) {
+            if (i === round.correctIndex) {
+              btnClass = 'bg-green-50 border-2 border-green-500 text-green-800';
+              if (feedback.correct && i === feedback.selectedIndex) animClass = 'animate-correct-flash';
+            } else if (i === feedback.selectedIndex && !feedback.correct) {
+              btnClass = 'bg-red-50 border-2 border-red-400 text-red-700';
+              animClass = 'animate-shake';
+            } else {
+              btnClass = 'bg-white border-2 border-cream-dark text-warm-gray-light opacity-40';
+            }
+          }
 
           return (
             <button
               key={i}
               onClick={() => handleSelect(i)}
               disabled={!!feedback}
-              className={`p-5 rounded-warm text-body-lg font-medium transition-all shadow-warm text-left ${btnClass} ${isCorrect ? 'animate-correct-flash' : ''}`}
+              className={`p-5 rounded-warm text-body-lg font-medium transition-all shadow-warm text-left ${btnClass} ${animClass}`}
             >
               <span className="text-warm-gray-light mr-3">{String.fromCharCode(65 + i)}.</span>
               {option}

@@ -6,14 +6,25 @@ import { useUser } from '@/hooks/useUser';
 import { useAdaptive } from '@/hooks/useAdaptive';
 import { getActiveGameConfigs } from '@/lib/game-data';
 import GameCard from '@/components/dashboard/GameCard';
-import { LogOut, User, Brain, ChevronRight, Activity, TrendingUp } from 'lucide-react';
+import { LogOut, User, Brain, ChevronRight, Activity, TrendingUp, Calendar } from 'lucide-react';
 
-function getTimeGreeting(name: string): string {
-  const hour = new Date().getHours();
-  if (hour < 12) return `Good morning, ${name}`;
-  if (hour < 17) return `Good afternoon, ${name}`;
-  return `Good evening, ${name}`;
-}
+const GAME_NAMES: Record<string, string> = {
+  'story-detective': 'Story Detective',
+  'memory-journey': 'Memory Journey',
+  'word-weaver': 'Word Weaver',
+  'number-flow': 'Number Flow',
+  'era-quiz': 'Era Quiz',
+  'pattern-garden': 'Pattern Garden',
+  'knowledge-quiz': 'Knowledge Quiz',
+  'word-scramble': 'Word Scramble',
+  'word-connection': 'Word Connection',
+};
+
+const INTEREST_LABELS: Record<string, string> = {
+  history: 'history', nature: 'nature', music: 'music', sports: 'sports',
+  science: 'science', cooking: 'cooking', travel: 'travel', literature: 'literature',
+  puzzles: 'puzzles', current_events: 'current events', art: 'art', animals: 'animals',
+};
 
 const NATURE_TIPS = [
   { headline: 'A good time to train your mind', body: 'Regular, gentle practice builds lasting mental strength more effectively than occasional long sessions. Even one game today counts.' },
@@ -31,10 +42,34 @@ function getDailyTip(): { headline: string; body: string } {
   return NATURE_TIPS[dayOfYear % NATURE_TIPS.length];
 }
 
+function getTimeGreeting(name: string): string {
+  const hour = new Date().getHours();
+  if (hour < 12) return `Good morning, ${name}`;
+  if (hour < 17) return `Good afternoon, ${name}`;
+  return `Good evening, ${name}`;
+}
+
+function formatSessionDate(dateStr: string): string {
+  if (!dateStr) return '';
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+  if (diffDays === 0) return 'Today';
+  if (diffDays === 1) return 'Yesterday';
+  if (diffDays < 7) return `${diffDays} days ago`;
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+function accuracyStyle(pct: number): { bg: string; color: string } {
+  if (pct >= 80) return { bg: '#d1fae5', color: '#065f46' };
+  if (pct >= 60) return { bg: '#fef3c7', color: '#92400e' };
+  return { bg: '#fee2e2', color: '#991b1b' };
+}
+
 export default function DashboardPage() {
   const router = useRouter();
   const { user, profile, loading: userLoading, logout } = useUser();
-  const { recommendations, stats, aiInsights, aiEncouragement, lastSessionSummary, loading: dataLoading } = useAdaptive(user?.id, profile);
+  const { recommendations, sessions, stats, aiInsights, aiEncouragement, lastSessionSummary, loading: dataLoading } = useAdaptive(user?.id, profile);
   const [heroImage, setHeroImage] = useState<string | null>(null);
   const [brainToday, setBrainToday] = useState<{ headline: string; body: string } | null>(null);
 
@@ -42,15 +77,12 @@ export default function DashboardPage() {
     if (!userLoading && !user) router.push('/');
   }, [user, userLoading, router]);
 
-  // Load hero image and brain-today card
   useEffect(() => {
     if (!user?.id) return;
-    // Try to load a generated hero image
     fetch(`/api/images?userId=${user.id}&purpose=dashboard`)
       .then(r => r.json())
       .then(d => { if (d.imageUrl) setHeroImage(d.imageUrl); })
       .catch(() => {});
-    // Load brain today card
     fetch(`/api/user?userId=${user.id}&action=brain-today`)
       .then(r => r.json())
       .then(d => { if (d.brainToday) setBrainToday(d.brainToday); })
@@ -72,9 +104,34 @@ export default function DashboardPage() {
   const topGame = recommendations[0] || null;
   const otherGames = recommendations.slice(1);
   const allGames = getActiveGameConfigs();
+  const hasHistory = !dataLoading && stats && stats.totalSessions > 0;
+  const recentSessions = sessions.slice(0, 6);
 
-  // Determine theme color from profile (simple fallback)
-  const themeColor = '#2D6A4F'; // forest green default
+  // Brain Today content — always show something meaningful
+  const brainTodayContent = (() => {
+    if (brainToday) return brainToday;
+    if (lastSessionSummary || aiEncouragement) {
+      return {
+        headline: lastSessionSummary ? 'Your Last Session' : 'Keep It Up',
+        body: lastSessionSummary || aiEncouragement || '',
+      };
+    }
+    // Interest-based fallback for users who have completed the survey
+    if (profile && profile.interests.length > 0) {
+      const labels = profile.interests.slice(0, 3).map(i => INTEREST_LABELS[i] || i);
+      const interestText = labels.length === 1
+        ? labels[0]
+        : labels.length === 2
+        ? `${labels[0]} and ${labels[1]}`
+        : `${labels[0]}, ${labels[1]}, and ${labels[2]}`;
+      return {
+        headline: 'Your Mind Is Ready',
+        body: `Today's games are tailored to your love of ${interestText}. Regular play — even just ten minutes — builds lasting memory and focus.`,
+      };
+    }
+    // Rotating daily tip for new users with no profile yet
+    return getDailyTip();
+  })();
 
   return (
     <div className="min-h-screen bg-cream">
@@ -111,52 +168,41 @@ export default function DashboardPage() {
 
         {/* Hero Section */}
         <div className="relative rounded-warm-lg overflow-hidden mb-8 animate-fade-in">
-          {/* Background — image or gradient */}
           {heroImage ? (
-            <div
-              className="absolute inset-0 bg-cover bg-center"
-              style={{ backgroundImage: `url(${heroImage})` }}
-            />
+            <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${heroImage})` }} />
           ) : (
-            <div
-              className="absolute inset-0"
-              style={{ background: `linear-gradient(135deg, #1E3A5F 0%, #2D6A4F 50%, #744210 100%)` }}
-            />
+            <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, #1E3A5F 0%, #2D6A4F 50%, #744210 100%)` }} />
           )}
-          {/* Overlay */}
           <div className="absolute inset-0 bg-black/40" />
-
-          {/* Content */}
           <div className="relative px-8 py-10">
             <h1 className="text-heading-lg font-bold text-white mb-2 drop-shadow">{greeting}</h1>
-            {stats && stats.streak > 0 && (
+            {stats && stats.streak >= 2 && (
               <p className="text-body-lg text-white/80 mb-4">
-                {stats.streak} day streak — wonderful consistency.
+                {stats.streak} days in a row — wonderful consistency.
               </p>
             )}
-            {stats && stats.totalSessions > 0 && (
+            {hasHistory ? (
               <div className="flex items-center gap-6">
                 <div className="text-center">
-                  <p className="text-2xl font-bold text-white">{stats.totalSessions}</p>
+                  <p className="text-2xl font-bold text-white">{stats!.totalSessions}</p>
                   <p className="text-sm text-white/70">sessions</p>
                 </div>
                 <div className="w-px h-8 bg-white/30" />
                 <div className="text-center">
-                  <p className="text-2xl font-bold text-white">{stats.averageAccuracy}%</p>
+                  <p className="text-2xl font-bold text-white">{stats!.averageAccuracy}%</p>
                   <p className="text-sm text-white/70">avg accuracy</p>
                 </div>
-                {stats.streak > 0 && (
+                {stats!.streak >= 1 && (
                   <>
                     <div className="w-px h-8 bg-white/30" />
                     <div className="text-center">
-                      <p className="text-2xl font-bold text-white">{stats.streak}</p>
-                      <p className="text-sm text-white/70">day streak</p>
+                      <p className="text-2xl font-bold text-white">{stats!.streak}</p>
+                      <p className="text-sm text-white/70">{stats!.streak === 1 ? 'day active' : 'day streak'}</p>
                     </div>
                   </>
                 )}
               </div>
-            )}
-            {(!stats || stats.totalSessions === 0) && (
+            ) : (
               <p className="text-body-lg text-white/80">
                 Ready to exercise your mind? Your first game is waiting below.
               </p>
@@ -179,7 +225,7 @@ export default function DashboardPage() {
           </Link>
         )}
 
-        {/* Your Brain Today */}
+        {/* Your Brain Today — always visible */}
         {!dataLoading && (
           <div className="mb-8 animate-slide-up">
             <div className="flex items-center gap-2 mb-3">
@@ -187,34 +233,10 @@ export default function DashboardPage() {
               <h2 className="text-heading font-bold text-warm-gray">Your Brain Today</h2>
             </div>
             <div className="bg-white rounded-warm-lg shadow-warm-md p-6 border-l-4 border-soft-blue">
-              {brainToday ? (
-                <>
-                  <p className="text-body-lg font-semibold text-warm-gray mb-2">{brainToday.headline}</p>
-                  <p className="text-body text-warm-gray-light">{brainToday.body}</p>
-                </>
-              ) : (aiEncouragement || lastSessionSummary) ? (
-                <>
-                  {lastSessionSummary && (
-                    <p className="text-body text-warm-gray mb-2">{lastSessionSummary}</p>
-                  )}
-                  {aiEncouragement && (
-                    <p className="text-body text-warm-gray-light italic">{aiEncouragement}</p>
-                  )}
-                </>
-              ) : (
-                // Warm daily tip when no AI data yet
-                (() => {
-                  const tip = getDailyTip();
-                  return (
-                    <>
-                      <p className="text-body-lg font-semibold text-warm-gray mb-2">{tip.headline}</p>
-                      <p className="text-body text-warm-gray-light">{tip.body}</p>
-                    </>
-                  );
-                })()
-              )}
+              <p className="text-body-lg font-semibold text-warm-gray mb-2">{brainTodayContent.headline}</p>
+              <p className="text-body text-warm-gray-light">{brainTodayContent.body}</p>
               {aiInsights && aiInsights !== aiEncouragement && (
-                <p className="text-body text-warm-gray-light mt-2 pt-2 border-t border-cream-dark">{aiInsights}</p>
+                <p className="text-body text-warm-gray-light mt-3 pt-3 border-t border-cream-dark">{aiInsights}</p>
               )}
             </div>
           </div>
@@ -242,8 +264,6 @@ export default function DashboardPage() {
                 <GameCard game={topGame} rank={0} isHighlighted={true} />
               </div>
             )}
-
-            {/* Other recommendations */}
             {otherGames.length > 0 && (
               <div className="mb-8">
                 <h2 className="text-heading font-bold text-warm-gray mb-4">More For You</h2>
@@ -254,8 +274,6 @@ export default function DashboardPage() {
                 </div>
               </div>
             )}
-
-            {/* All games grid (if no recommendations yet) */}
             {recommendations.length === 0 && (
               <div className="mb-8">
                 <h2 className="text-heading font-bold text-warm-gray mb-4">Brain Games</h2>
@@ -272,6 +290,70 @@ export default function DashboardPage() {
               </div>
             )}
           </>
+        )}
+
+        {/* Your Journey — history section */}
+        {hasHistory && (
+          <div className="mb-8 animate-slide-up">
+            <div className="flex items-center gap-2 mb-4">
+              <TrendingUp className="w-5 h-5 text-soft-blue" />
+              <h2 className="text-heading font-bold text-warm-gray">Your Journey</h2>
+            </div>
+
+            {/* Stats row */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+              <div className="bg-white rounded-warm shadow-warm p-4 text-center">
+                <p className="text-2xl font-bold text-warm-gray">{stats!.totalSessions}</p>
+                <p className="text-sm text-warm-gray-light">Games Played</p>
+              </div>
+              <div className="bg-white rounded-warm shadow-warm p-4 text-center">
+                <p className="text-2xl font-bold text-warm-gray">{stats!.averageAccuracy}%</p>
+                <p className="text-sm text-warm-gray-light">Avg Accuracy</p>
+              </div>
+              <div className="bg-white rounded-warm shadow-warm p-4 text-center">
+                <p className="text-2xl font-bold text-warm-gray">{stats!.streak || 0}</p>
+                <p className="text-sm text-warm-gray-light">Day Streak</p>
+              </div>
+              <div className="bg-white rounded-warm shadow-warm p-4 text-center">
+                <p className="text-sm font-bold text-warm-gray leading-tight truncate px-1">
+                  {GAME_NAMES[stats!.favoriteGame] || '—'}
+                </p>
+                <p className="text-sm text-warm-gray-light">Favourite Game</p>
+              </div>
+            </div>
+
+            {/* Recent sessions list */}
+            {recentSessions.length > 0 && (
+              <div className="bg-white rounded-warm-lg shadow-warm overflow-hidden">
+                <div className="px-5 py-3 border-b border-cream-dark flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-warm-gray-light" />
+                  <p className="text-body font-semibold text-warm-gray">Recent Sessions</p>
+                </div>
+                <div className="divide-y divide-cream-dark">
+                  {recentSessions.map((session: any, i: number) => {
+                    const pct = Math.round(session.accuracy);
+                    const style = accuracyStyle(pct);
+                    const name = GAME_NAMES[session.game_type || session.gameType] || session.game_type || session.gameType || 'Game';
+                    const dateStr = formatSessionDate(session.created_at || session.createdAt || '');
+                    return (
+                      <div key={session.id || i} className="px-5 py-3 flex items-center justify-between">
+                        <div>
+                          <p className="text-body font-medium text-warm-gray">{name}</p>
+                          <p className="text-sm text-warm-gray-light">{dateStr}</p>
+                        </div>
+                        <div
+                          className="px-3 py-1 rounded-full text-sm font-semibold flex-shrink-0"
+                          style={{ backgroundColor: style.bg, color: style.color }}
+                        >
+                          {pct}%
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
         )}
 
         {/* Retake survey */}
