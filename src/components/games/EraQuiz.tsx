@@ -93,8 +93,8 @@ export default function EraQuiz({
         </div>
       </div>
 
-      {/* Question card */}
-      <div className="bg-white rounded-warm-lg shadow-warm-md p-8 mb-6 animate-fade-in">
+      {/* Question card — key forces remount (fade-in) on each new round */}
+      <div key={currentRound} className="bg-white rounded-warm-lg shadow-warm-md p-8 mb-6 animate-fade-in">
         <p className="text-heading font-bold text-warm-gray mb-8 leading-snug">
           {current.question}
         </p>
@@ -114,9 +114,9 @@ export default function EraQuiz({
                 disabled={revealed}
                 className={`w-full text-left py-5 px-6 rounded-warm-lg border-2 transition-all ${
                   isCorrectOption
-                    ? 'border-green-500 bg-green-100 text-green-800'
+                    ? 'border-green-500 bg-green-50 text-green-800 animate-correct-flash'
                     : isWrong
-                    ? 'border-red-400 bg-red-50 text-red-700'
+                    ? 'border-red-400 bg-red-50 text-red-700 animate-shake'
                     : isUnselected
                     ? 'border-cream-dark bg-cream text-warm-gray-light cursor-default'
                     : isSelected

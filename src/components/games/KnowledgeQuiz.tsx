@@ -71,7 +71,7 @@ export default function KnowledgeQuiz({ difficulty, interests, onAnswer, onCompl
         <div className="bg-soft-blue rounded-full h-3 transition-all duration-500" style={{ width: `${((currentRound - 1) / totalRounds) * 100}%` }} />
       </div>
 
-      <div className="text-center mb-4">
+      <div key={currentRound} className="text-center mb-4 animate-fade-in">
         {round.category && (
           <span className="inline-block px-3 py-1 bg-soft-blue/10 text-soft-blue rounded-full text-sm mb-3">
             {round.category}
@@ -80,23 +80,22 @@ export default function KnowledgeQuiz({ difficulty, interests, onAnswer, onCompl
         <p className="text-heading font-semibold text-warm-gray">{round.question}</p>
       </div>
 
-      <div className="grid grid-cols-1 gap-3 max-w-lg mx-auto mt-6">
+      <div key={currentRound} className="grid grid-cols-1 gap-3 max-w-lg mx-auto mt-6">
         {round.options.map((option, i) => {
-          let btnClass = 'bg-white border-2 border-cream-dark hover:border-soft-blue text-warm-gray';
-          if (feedback) {
-            if (i === round.correctIndex) {
-              btnClass = 'bg-sage/20 border-2 border-sage text-sage-dark';
-            } else {
-              btnClass = 'bg-white border-2 border-cream-dark text-warm-gray-light opacity-50';
-            }
-          }
+          const isCorrect = !!feedback && i === round.correctIndex;
+          const isWrong = !!feedback && !feedback.correct && i !== round.correctIndex;
+          const btnClass = feedback
+            ? isCorrect
+              ? 'bg-green-50 border-2 border-green-500 text-green-800'
+              : 'bg-white border-2 border-cream-dark text-warm-gray-light opacity-50'
+            : 'bg-white border-2 border-cream-dark hover:border-soft-blue text-warm-gray';
 
           return (
             <button
               key={i}
               onClick={() => handleSelect(i)}
               disabled={!!feedback}
-              className={`p-5 rounded-warm text-body-lg font-medium transition-all shadow-warm text-left ${btnClass}`}
+              className={`p-5 rounded-warm text-body-lg font-medium transition-all shadow-warm text-left ${btnClass} ${isCorrect ? 'animate-correct-flash' : ''}`}
             >
               <span className="text-warm-gray-light mr-3">{String.fromCharCode(65 + i)}.</span>
               {option}

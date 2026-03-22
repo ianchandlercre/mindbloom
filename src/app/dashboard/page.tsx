@@ -6,13 +6,29 @@ import { useUser } from '@/hooks/useUser';
 import { useAdaptive } from '@/hooks/useAdaptive';
 import { getActiveGameConfigs } from '@/lib/game-data';
 import GameCard from '@/components/dashboard/GameCard';
-import { LogOut, User, Brain, ChevronRight, Activity } from 'lucide-react';
+import { LogOut, User, Brain, ChevronRight, Activity, TrendingUp } from 'lucide-react';
 
 function getTimeGreeting(name: string): string {
   const hour = new Date().getHours();
   if (hour < 12) return `Good morning, ${name}`;
   if (hour < 17) return `Good afternoon, ${name}`;
   return `Good evening, ${name}`;
+}
+
+const NATURE_TIPS = [
+  { headline: 'A good time to train your mind', body: 'Regular, gentle practice builds lasting mental strength more effectively than occasional long sessions. Even one game today counts.' },
+  { headline: 'Curiosity keeps the mind alive', body: 'Every question you tackle strengthens the connections between ideas. Wondering is itself a cognitive exercise worth celebrating.' },
+  { headline: 'Rest is part of the work', body: 'Your brain consolidates what you have practised while you sleep. A good night\'s rest makes tomorrow\'s games feel easier and more rewarding.' },
+  { headline: 'Small steps build a long trail', body: 'Each session adds to your cognitive reserve — a lifetime of learning that pays dividends every decade.' },
+  { headline: 'The mind, like a garden, rewards tending', body: 'Regular, gentle attention keeps mental pathways clear and growing. You are doing something wonderful for your future self.' },
+  { headline: 'Nature restores, play sharpens', body: 'Time outdoors and brain games work beautifully together. Each refreshes a different kind of attention and keeps you at your best.' },
+  { headline: 'Every season has its gifts', body: 'Some days scores will be higher, some lower — that is natural. What matters most is showing up and enjoying the journey.' },
+];
+
+function getDailyTip(): { headline: string; body: string } {
+  const start = new Date(new Date().getFullYear(), 0, 0);
+  const dayOfYear = Math.floor((Date.now() - start.getTime()) / 86_400_000);
+  return NATURE_TIPS[dayOfYear % NATURE_TIPS.length];
 }
 
 export default function DashboardPage() {
@@ -72,6 +88,10 @@ export default function DashboardPage() {
             <span className="text-body font-bold text-warm-gray">MindBloom</span>
           </div>
           <div className="flex items-center gap-4">
+            <Link href="/progress" className="flex items-center gap-1.5 text-body text-warm-gray-light hover:text-warm-gray transition-colors font-medium">
+              <TrendingUp className="w-4 h-4" />
+              <span className="hidden sm:inline">Progress</span>
+            </Link>
             <Link href="/profile" className="flex items-center gap-1.5 text-body text-soft-blue hover:text-soft-blue-dark transition-colors font-medium">
               <User className="w-4 h-4" />
               <span className="hidden sm:inline">Profile</span>
@@ -160,7 +180,7 @@ export default function DashboardPage() {
         )}
 
         {/* Your Brain Today */}
-        {(brainToday || aiEncouragement || lastSessionSummary) && (
+        {!dataLoading && (
           <div className="mb-8 animate-slide-up">
             <div className="flex items-center gap-2 mb-3">
               <Activity className="w-5 h-5 text-soft-blue" />
@@ -172,7 +192,7 @@ export default function DashboardPage() {
                   <p className="text-body-lg font-semibold text-warm-gray mb-2">{brainToday.headline}</p>
                   <p className="text-body text-warm-gray-light">{brainToday.body}</p>
                 </>
-              ) : (
+              ) : (aiEncouragement || lastSessionSummary) ? (
                 <>
                   {lastSessionSummary && (
                     <p className="text-body text-warm-gray mb-2">{lastSessionSummary}</p>
@@ -181,6 +201,17 @@ export default function DashboardPage() {
                     <p className="text-body text-warm-gray-light italic">{aiEncouragement}</p>
                   )}
                 </>
+              ) : (
+                // Warm daily tip when no AI data yet
+                (() => {
+                  const tip = getDailyTip();
+                  return (
+                    <>
+                      <p className="text-body-lg font-semibold text-warm-gray mb-2">{tip.headline}</p>
+                      <p className="text-body text-warm-gray-light">{tip.body}</p>
+                    </>
+                  );
+                })()
               )}
               {aiInsights && aiInsights !== aiEncouragement && (
                 <p className="text-body text-warm-gray-light mt-2 pt-2 border-t border-cream-dark">{aiInsights}</p>
